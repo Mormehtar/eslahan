@@ -1,3 +1,5 @@
-/**
- * Created by darkrider on 8/5/15.
- */
+function DBEnv (dao) {
+    this.dao = dao;
+}
+
+module.exports = DBEnv;
