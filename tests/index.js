@@ -2,7 +2,7 @@ var assert = require("assert");
 
 var DBEnv = require("..");
 
-describe.only("DBEnv object", function () {
+describe("DBEnv object", function () {
 
     it("Should be a function", function(){
         assert(typeof DBEnv == "function");
