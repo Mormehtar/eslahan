@@ -4,6 +4,7 @@ var EtalonDao = require("./testHelpers").tableDao;
 var Table = require("../table");
 
 var uuidField = require("../fields/uuid");
+var dependencyField = require("../fields/dependency");
 var DBEnvError = require("../errors");
 
 function createTestTable () {
@@ -222,7 +223,37 @@ describe("Table object", function () {
             assert.isUndefined(table.getRow("SomeKey"));
         });
 
-        //TODO test dependencies!
+        it("Should populate if demanded row", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var key = daughter.insert();
+            var row = daughter.getRow(key, false, true);
+            var etalon = daughter.getRow(key);
+            etalon.mother = mother.getRow(etalon.mother);
+            assert.deepEqual(row, etalon);
+        });
+
+        /*it("Should pass parameters down to dependent tables", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var grandDaughter =
+        })*/
     });
 
     describe("hasRow method", function () {

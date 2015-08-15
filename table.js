@@ -79,7 +79,7 @@ Table.prototype.getRow = function (key, fields, populated) {
         var fieldName = typeof field == "string" ? field : field.name;
         var dependency = self.fields[fieldName].dependency;
         if (dependency && populated) {
-            obj[fieldName] = dependency.getRow(row[fieldName], field.fields, field.hadOwnProperty("populated") ? field.populated : true);
+            obj[fieldName] = dependency.getRow(row[fieldName], field.fields, field.hasOwnProperty("populated") ? field.populated : true);
         } else {
             obj[fieldName] = row[fieldName];
         }
