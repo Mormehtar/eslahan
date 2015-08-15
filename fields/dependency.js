@@ -9,6 +9,6 @@ module.exports = function (table) {
         }
         return table.insert(value)
     };
-    result.dependsOn = table;
+    result.dependency = table;
     return result;
 };
