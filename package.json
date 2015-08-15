@@ -1,17 +1,21 @@
 {
-  "name": "tester",
-  "version": "1.0.0",
-  "description": "",
+  "name": "espahan",
+  "version": "0.0.1",
+  "description": "Database environment constructor for tests",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --recursive ./tests"
   },
-  "author": "Dark Rider",
+  "author": "Dark Rider <mormehtar@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "chai": "^3.2.0"
+    "chai": "^3.2.0",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4",
+    "zatanna": "^0.4.2"
   },
   "dependencies": {
+    "bluebird": "^2.9.34",
     "uuid": "^2.0.1"
   }
 }
