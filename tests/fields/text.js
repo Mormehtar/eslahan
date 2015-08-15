@@ -1,23 +1,23 @@
-var assert = require("assert");
+var assert = require("chai").assert;
 var field = require("../../fields/text");
 var REPEATS = 100;
 
 describe("Text field", function() {
 
     it("Should exist", function () {
-        assert(typeof field === "function");
+        assert.isFunction(field);
     });
 
     it("Should return function", function () {
-        assert(typeof field() === "function");
+        assert.isFunction(field());
     });
 
     it("Should return value if it exists", function(){
-        assert(field()("SomeData") === "SomeData");
+        assert.equal(field()("SomeData"), "SomeData");
     });
 
     it("Should return value if it exists and undefined", function () {
-        assert(field()(undefined) === undefined);
+        assert.isUndefined(field()(undefined));
     });
 
     it("Should return latin string of length 2-8 by default", function () {
@@ -25,7 +25,7 @@ describe("Text field", function() {
         var innerField = field();
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 
@@ -34,7 +34,7 @@ describe("Text field", function() {
         var innerField = field({length: 4});
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 
@@ -43,7 +43,7 @@ describe("Text field", function() {
         var innerField = field({length: 4, dispertion: 1});
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 
@@ -52,7 +52,7 @@ describe("Text field", function() {
         var innerField = field({length: 3, dispertion: 0});
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 
@@ -61,7 +61,7 @@ describe("Text field", function() {
         var innerField = field({dispertion: 0});
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 
@@ -70,7 +70,7 @@ describe("Text field", function() {
         var innerField = field({length: 0});
         for (var i = 0; i<REPEATS; ++i) {
             var result = innerField();
-            assert(reg.test(result), "Fails with " + result);
+            assert.match(result, reg, "Fails with " + result);
         }
     });
 });
