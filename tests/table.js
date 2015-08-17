@@ -214,7 +214,7 @@ describe("Table object", function () {
             var table = createTestTable();
             var key = table.insert();
             var baseRow = {data: table.rows[key].data};
-            var row = table.getRow(key, ["data"]);
+            var row = table.getRow(key, {fields: ["data"]});
             assert.deepEqual(row, baseRow);
         });
 
@@ -235,13 +235,13 @@ describe("Table object", function () {
                 .addField("mother", dependencyField(mother))
                 .finalize();
             var key = daughter.insert();
-            var row = daughter.getRow(key, false, true);
+            var row = daughter.getRow(key, {populated: true});
             var etalon = daughter.getRow(key);
             etalon.mother = mother.getRow(etalon.mother);
             assert.deepEqual(row, etalon);
         });
 
-        /*it("Should pass parameters down to dependent tables", function () {
+        it("Should not populate dependent tables without demand", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
                 .addField("id", uuidField(), true)
@@ -252,8 +252,58 @@ describe("Table object", function () {
                 .addField("id", uuidField(), true)
                 .addField("mother", dependencyField(mother))
                 .finalize();
-            var grandDaughter =
-        })*/
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert();
+            var row = grandDaughter.getRow(key, {populated: true});
+            var etalon = grandDaughter.getRow(key);
+            etalon.daughter = daughter.getRow(etalon.daughter);
+            assert.deepEqual(row, etalon);
+        });
+
+        it("Should pass parameters down to dependant tables", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert();
+            var row = grandDaughter.getRow(
+                key,
+                {
+                    fields:[
+                        {
+                            name:"daughter",
+                            fields:[
+                                {
+                                    name: "mother",
+                                    fields:["data"]
+                                }
+                            ],
+                            populated: true
+                        }
+                    ],
+                    populated: true
+                }
+            );
+            var etalon = grandDaughter.getRow(key, {fields:["daughter"]});
+            etalon.daughter = daughter.getRow(etalon.daughter, {fields:["mother"]});
+            etalon.daughter.mother = mother.getRow(etalon.daughter.mother, {fields:["data"]});
+            assert.deepEqual(row, etalon);
+        });
     });
 
     describe("hasRow method", function () {

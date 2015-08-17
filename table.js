@@ -65,21 +65,22 @@ Table.prototype.setKey = function (fieldName) {
     this.key = fieldName;
 };
 
-Table.prototype.getRow = function (key, fields, populated) {
+Table.prototype.getRow = function (key, options) {
     if (!this.finalized) {
         throw new DBEnvError("Can`t get row from not finalized table");
     }
-    var _fields = fields ? fields : Object.keys(this.fields);
+    var _options = options || {};
+    var fields = _options.fields ? _options.fields : Object.keys(this.fields);
     var self = this;
     var row = self.rows[key];
     if (!row) {
         return undefined;
     }
-    return _fields.reduce(function (obj, field) {
+    return fields.reduce(function (obj, field) {
         var fieldName = typeof field == "string" ? field : field.name;
         var dependency = self.fields[fieldName].dependency;
-        if (dependency && populated) {
-            obj[fieldName] = dependency.getRow(row[fieldName], field.fields, field.hasOwnProperty("populated") ? field.populated : true);
+        if (dependency && _options.populated) {
+            obj[fieldName] = dependency.getRow(row[fieldName], field);
         } else {
             obj[fieldName] = row[fieldName];
         }
