@@ -35,8 +35,8 @@ DBEnv.prototype.getTable = function (tableName) {
 
 function checkTables (table, unfinished, finished) {
     var newFinished = [];
-    for (var i = unfinished.length; --i;) {
-        var checkingTable = unfinished[i];
+    for (var i = unfinished.length; i;) {
+        var checkingTable = unfinished[--i];
         if (checkingTable.depends[table.table.name]) {
             checkingTable.priority = Math.max(checkingTable.priority, table.priority + 1);
             delete checkingTable.depends[table.table.name];
@@ -68,8 +68,8 @@ DBEnv.prototype.finalize = function () {
         table.depends = Object.keys(fields).map(function (fieldName) {
             var dependency = fields[fieldName].dependency;
             return dependency && dependency.name;
-        }).filter(function (table) {
-            if (table) {
+        }).filter(function (tableName) {
+            if (tableName) {
                 ++table.dependencies;
                 return true;
             }
@@ -86,12 +86,12 @@ DBEnv.prototype.finalize = function () {
         return self.tables[tableName];
     });
 
-    for (var i=unfinished.length; --i;) {
-        checkTables(finished[i], unfinished, finished);
+    for (var i=finished.length; i;) {
+        checkTables(finished[--i], unfinished, finished);
     }
 
     if (unfinished.length) {
-        throw DBEnvError("There are table with open dependencies: " + unfinished.map(function (table) {
+        throw new DBEnvError("There are table with open dependencies: " + unfinished.map(function (table) {
                 return table.table.name;
             }).join(", "));
     }
