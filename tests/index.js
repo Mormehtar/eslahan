@@ -125,9 +125,8 @@ describe("DBEnv object", function () {
         });
 
         it("should create tableOrder property", function () {
-            var dao = new TableDao();
-            var env = new DBEnv({
-                mother: dao, father: dao, daughter: dao, grandFather: dao, someOther: dao
+            var env = new DBEnv(new TableDao(), function (tableName, dao) {
+                return dao;
             });
             env.addTable("mother")
                 .addField("id", uuidField(), true);
@@ -147,6 +146,43 @@ describe("DBEnv object", function () {
             assert.ok(env.tableOrder.indexOf("daughter") > env.tableOrder.indexOf("father"));
             assert.ok(env.tableOrder.indexOf("daughter") > env.tableOrder.indexOf("mother"));
             assert.ok(env.tableOrder.indexOf("father") > env.tableOrder.indexOf("grandFather"));
+        });
+    });
+
+    describe("cleanUp method", function () {
+        it("Should throw exception if environment not finalized", function () {
+            var env = new DBEnv(new TableDao(), function (tableName, dao) {
+                return dao;
+            });
+            assert.throw(function () {
+                env.cleanup();
+            }, DBEnvError);
+        });
+
+        it("Should cleanup data in right order", function () {
+            var env = new DBEnv({
+                mother: new TableDao(),
+                father: new TableDao(),
+                daughter: new TableDao(),
+                grandFather: new TableDao()
+            });
+            env.addTable("mother")
+                .addField("id", uuidField(), true);
+            env.addTable("grandFather", uuidField(), true)
+                .addField("id", uuidField(), true);
+            env.addTable("father")
+                .addField("id", uuidField(), true)
+                .addField("grandFather", dependencyField(env.getTable("grandFather")));
+            env.addTable("daughter")
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(env.getTable("mother")))
+                .addField("father", dependencyField(env.getTable("father")));
+            env.finalize();
+            env.getTable("daughter").insert();
+            env.cleanup();
+            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["mother"].delete), "Mother should not be deleted before daughter");
+            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["father"].delete), "Father should not be deleted before father");
+            assert.ok(env.dao["father"].delete.calledBefore(env.dao["grandFather"].delete), "GrandFather should not be deleted before father");
         });
     });
 });

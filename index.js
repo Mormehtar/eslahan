@@ -1,7 +1,12 @@
 var Table = require("./table");
 var DBEnvError = require("./errors");
 
-function DBEnv (dao) {
+function dictChooser (tableName, dao) {
+    return dao[tableName];
+}
+
+function DBEnv (dao, tableGetter) {
+    this.tableGetter = tableGetter || dictChooser;
     this.dao = dao;
     this.tables = {};
     this.finalized = false;
@@ -16,12 +21,12 @@ DBEnv.prototype.addTable = function (name) {
     if (this.tables[name]) {
         throw new DBEnvError("Can`t add table " + name + " again");
     }
-    var table = new Table(name, this.dao[name]);
+    var table = new Table(name, this.tableGetter(name, this.dao));
     this.tables[name] = {
         table: table,
         priority: -1,
         dependencies: -1,
-        depends: []
+        depends: {}
     };
     this.tableOrder = [];
     return table;
@@ -97,7 +102,7 @@ DBEnv.prototype.finalize = function () {
     }
 
     tables.sort(function (t1, t2) {
-        return t2.priority - t2.priority;
+        return t1.priority - t2.priority;
     });
 
     this.tableOrder = tables.map(function (table) {
@@ -105,4 +110,13 @@ DBEnv.prototype.finalize = function () {
     });
 
     return this.finalized = true;
+};
+
+DBEnv.prototype.cleanup = function () {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t clean up not finalized environment");
+    }
+    for (var i = this.tableOrder.length; i;) {
+        this.tables[this.tableOrder[--i]].table.cleanup();
+    }
 };
