@@ -20,6 +20,10 @@ describe("Text field", function() {
         assert.isUndefined(field()(undefined));
     });
 
+    it("Should return null if options nullable", function () {
+        assert.isNull(field({nullable:1})());
+    });
+
     it("Should return latin string of length 2-8 by default", function () {
         check(field(), /^\w{2,8}$/);
     });

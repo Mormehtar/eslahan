@@ -79,7 +79,7 @@ Table.prototype.getRow = function (key, options) {
     return fields.reduce(function (obj, field) {
         var fieldName = typeof field == "string" ? field : field.name;
         var dependency = self.fields[fieldName].dependency;
-        if (dependency && _options.populated) {
+        if (dependency && row[fieldName] != null && _options.populated) {
             obj[fieldName] = dependency.getRow(row[fieldName], field);
         } else {
             obj[fieldName] = row[fieldName];

@@ -264,6 +264,28 @@ describe("Table object", function () {
             assert.deepEqual(row, etalon);
         });
 
+        it("Should populate tables right even if null", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert({daughter:null});
+            var row = grandDaughter.getRow(key, {populated: true});
+            var etalon = grandDaughter.getRow(key);
+            assert.deepEqual(row, etalon);
+        });
+
         it("Should pass parameters down to dependant tables", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
@@ -318,7 +340,6 @@ describe("Table object", function () {
             var key = table.insert();
             assert.isTrue(table.hasRow(key));
         });
-
     });
 
     describe("finalize method", function () {
@@ -350,6 +371,5 @@ describe("Table object", function () {
             table.addField("uuid", uuidField(), true).finalize();
             assert.ok(table.finalized);
         });
-
     });
 });
