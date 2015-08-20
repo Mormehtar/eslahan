@@ -5,6 +5,7 @@ var Table = require("../table");
 
 var uuidField = require("../fields/uuid");
 var dependencyField = require("../fields/dependency");
+var multiDependencyField = require("../fields/multiDependency");
 var DBEnvError = require("../errors");
 
 function createTestTable () {
@@ -232,6 +233,23 @@ describe("Table object", function () {
             var etalon = daughter.getRow(key);
             etalon.mother = mother.getRow(etalon.mother);
             assert.deepEqual(row, etalon);
+        });
+
+        it.only("Should populate if has multi dependency", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mothers", multiDependencyField(mother, "data"))
+                .finalize();
+            var key = daughter.insert();
+            var etalon = daughter.getRow(key, {fields:["mothers"]});
+            etalon.mothers = mother.getRowsByIndex("data", etalon.mothers, {fields:["id"]});
+            assert.deepEqual(daughter.getRow(key, {fields:[{name: "mothers", fields:["id"]}], populated: true}), etalon);
         });
 
         it("Should not populate dependent tables without demand", function () {

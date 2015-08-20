@@ -91,7 +91,11 @@ Table.prototype.getRow = function (key, options) {
         var fieldName = typeof field == "string" ? field : field.name;
         var dependency = self.fields[fieldName].dependency;
         if (dependency && row[fieldName] != null && _options.populated) {
-            obj[fieldName] = dependency.getRow(row[fieldName], field);
+            if (self.fields[fieldName].hasOwnProperty("field") && self.fields[fieldName].field != dependency.key) {
+                obj[fieldName] = dependency.getRowsByIndex(self.fields[fieldName].field, row[fieldName], field);
+            } else {
+                obj[fieldName] = dependency.getRow(row[fieldName], field);
+            }
         } else {
             obj[fieldName] = row[fieldName];
         }
