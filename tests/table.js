@@ -235,7 +235,7 @@ describe("Table object", function () {
             assert.deepEqual(row, etalon);
         });
 
-        it.only("Should populate if has multi dependency", function () {
+        it("Should populate if has multi dependency", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
                 .addField("id", uuidField(), true)
