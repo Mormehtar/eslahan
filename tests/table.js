@@ -156,13 +156,6 @@ describe("Table object", function () {
             assert.deepEqual(table.rows, {});
         });
 
-        it("Should not touch DAO if empty", function () {
-            var table = createTestTable();
-            table.cleanup();
-
-            assert.ok(table.dao.delete.notCalled);
-        });
-
     });
 
     describe("setKey method", function () {

@@ -62,9 +62,6 @@ Table.prototype.cleanup = function () {
     if (!this.finalized) {
         throw new DBEnvError("Can`t cleanup not finalized table");
     }
-    if (!Object.keys(this.rows).length) {
-        return;
-    }
     this.dao.delete();
     this.rows = {};
 };
