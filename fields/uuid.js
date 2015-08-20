@@ -1,7 +1,8 @@
 var uuid = require("uuid").v4;
+var baseGenerator = require("./utils/baseGenerator");
 
-module.exports = function () {
-    return function (value) {
-        return arguments.length > 0 ? value : uuid();
-    }
+var specificGenerator = function () { return function () { return uuid(); }; };
+
+module.exports = function (options) {
+    return baseGenerator({options: options, specificGenerator: specificGenerator});
 };

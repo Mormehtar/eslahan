@@ -13,9 +13,17 @@ function Table (name, dao) {
     this.key = null;
     this.rows = {};
     this.finalized = false;
+    this.indexes = {};
 }
 
 module.exports = Table;
+
+function addIndexElement (index, key, element) {
+    if (!index[element]) {
+        index[element] = [];
+    }
+    index[element].push(key);
+}
 
 Table.prototype.addField = function (name, generator, key) {
     if (this.finalized) {
@@ -34,12 +42,18 @@ Table.prototype.insert = function (data) {
     }
     var _data = data || {};
     var self = this;
-    var insertObject = Object.keys(this.fields).reduce(function (obj, fieldName) {
+    var fields = Object.keys(this.fields);
+    var insertObject = fields.reduce(function (obj, fieldName) {
         obj[fieldName] = _data.hasOwnProperty(fieldName) ? self.fields[fieldName](_data[fieldName]) : self.fields[fieldName]();
         return obj;
     }, {});
     self.dao.insert(insertObject);
     var key = insertObject[self.key];
+    fields.forEach(function (fieldName) {
+        if (self.indexes[fieldName]) {
+            addIndexElement(self.indexes[fieldName], key, insertObject[fieldName]);
+        }
+    });
     self.rows[key] = insertObject;
     return key;
 };
@@ -47,9 +61,6 @@ Table.prototype.insert = function (data) {
 Table.prototype.cleanup = function () {
     if (!this.finalized) {
         throw new DBEnvError("Can`t cleanup not finalized table");
-    }
-    if (!Object.keys(this.rows).length) {
-        return;
     }
     this.dao.delete();
     this.rows = {};
@@ -65,21 +76,26 @@ Table.prototype.setKey = function (fieldName) {
     this.key = fieldName;
 };
 
-Table.prototype.getRow = function (key, fields, populated) {
+Table.prototype.getRow = function (key, options) {
     if (!this.finalized) {
         throw new DBEnvError("Can`t get row from not finalized table");
     }
-    var _fields = fields ? fields : Object.keys(this.fields);
+    var _options = options || {};
+    var fields = _options.fields ? _options.fields : Object.keys(this.fields);
     var self = this;
     var row = self.rows[key];
     if (!row) {
         return undefined;
     }
-    return _fields.reduce(function (obj, field) {
+    return fields.reduce(function (obj, field) {
         var fieldName = typeof field == "string" ? field : field.name;
         var dependency = self.fields[fieldName].dependency;
-        if (dependency && populated) {
-            obj[fieldName] = dependency.getRow(row[fieldName], field.fields, field.hasOwnProperty("populated") ? field.populated : true);
+        if (dependency && row[fieldName] != null && _options.populated) {
+            if (self.fields[fieldName].hasOwnProperty("field") && self.fields[fieldName].field != dependency.key) {
+                obj[fieldName] = dependency.getRowsByIndex(self.fields[fieldName].field, row[fieldName], field);
+            } else {
+                obj[fieldName] = dependency.getRow(row[fieldName], field);
+            }
         } else {
             obj[fieldName] = row[fieldName];
         }
@@ -103,4 +119,44 @@ Table.prototype.finalize = function () {
         throw new DBEnvError("Can`t finalize table without key field");
     }
     return this.finalized = true;
+};
+
+Table.prototype.addIndex = function (fieldName) {
+    if (Object.keys(this.fields).indexOf(fieldName) === -1) {
+        throw new DBEnvError("Can`t add index for field " + fieldName + " it is absent");
+    }
+    if (this.indexes[fieldName]) {
+        return this;
+    }
+    this.indexes[fieldName] = {};
+    if (this.finalized) {
+        var self = this;
+        var index = self.indexes[fieldName];
+        Object.keys(self.rows).forEach(function (key) {
+            var element = self.rows[key][fieldName];
+            addIndexElement(index, key, element);
+        });
+    }
+    return this;
+};
+
+Table.prototype.dropIndex = function (fieldName) {
+    if (Object.keys(this.fields).indexOf(fieldName) === -1) {
+        throw new DBEnvError("Can`t add index for field " + fieldName + " it is absent");
+    }
+    delete this.indexes[fieldName];
+    return this;
+};
+
+Table.prototype.getRowsByIndex = function (fieldName, fieldValue, options) {
+    if (!this.indexes[fieldName]) {
+        throw new DBEnvError("There is no index for field: "+ fieldName);
+    }
+    if (!this.indexes[fieldName][fieldValue]) {
+        return [];
+    }
+    var self = this;
+    return this.indexes[fieldName][fieldValue].map(function (key) {
+        return self.getRow(key, options);
+    });
 };

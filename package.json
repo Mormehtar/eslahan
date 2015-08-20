@@ -1,6 +1,6 @@
 {
-  "name": "espahan",
-  "version": "0.0.1",
+  "name": "eslahan",
+  "version": "0.1.0",
   "description": "Database environment constructor for tests",
   "main": "index.js",
   "scripts": {
@@ -11,11 +11,9 @@
   "devDependencies": {
     "chai": "^3.2.0",
     "mocha": "^2.2.5",
-    "sinon": "^1.15.4",
-    "zatanna": "^0.4.2"
+    "sinon": "^1.15.4"
   },
   "dependencies": {
-    "bluebird": "^2.9.34",
     "uuid": "^2.0.1"
   }
 }

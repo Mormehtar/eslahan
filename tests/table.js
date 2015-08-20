@@ -5,6 +5,7 @@ var Table = require("../table");
 
 var uuidField = require("../fields/uuid");
 var dependencyField = require("../fields/dependency");
+var multiDependencyField = require("../fields/multiDependency");
 var DBEnvError = require("../errors");
 
 function createTestTable () {
@@ -156,13 +157,6 @@ describe("Table object", function () {
             assert.deepEqual(table.rows, {});
         });
 
-        it("Should not touch DAO if empty", function () {
-            var table = createTestTable();
-            table.cleanup();
-
-            assert.ok(table.dao.delete.notCalled);
-        });
-
     });
 
     describe("setKey method", function () {
@@ -214,7 +208,7 @@ describe("Table object", function () {
             var table = createTestTable();
             var key = table.insert();
             var baseRow = {data: table.rows[key].data};
-            var row = table.getRow(key, ["data"]);
+            var row = table.getRow(key, {fields: ["data"]});
             assert.deepEqual(row, baseRow);
         });
 
@@ -235,13 +229,30 @@ describe("Table object", function () {
                 .addField("mother", dependencyField(mother))
                 .finalize();
             var key = daughter.insert();
-            var row = daughter.getRow(key, false, true);
+            var row = daughter.getRow(key, {populated: true});
             var etalon = daughter.getRow(key);
             etalon.mother = mother.getRow(etalon.mother);
             assert.deepEqual(row, etalon);
         });
 
-        /*it("Should pass parameters down to dependent tables", function () {
+        it("Should populate if has multi dependency", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mothers", multiDependencyField(mother, "data"))
+                .finalize();
+            var key = daughter.insert();
+            var etalon = daughter.getRow(key, {fields:["mothers"]});
+            etalon.mothers = mother.getRowsByIndex("data", etalon.mothers, {fields:["id"]});
+            assert.deepEqual(daughter.getRow(key, {fields:[{name: "mothers", fields:["id"]}], populated: true}), etalon);
+        });
+
+        it("Should not populate dependent tables without demand", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
                 .addField("id", uuidField(), true)
@@ -252,8 +263,80 @@ describe("Table object", function () {
                 .addField("id", uuidField(), true)
                 .addField("mother", dependencyField(mother))
                 .finalize();
-            var grandDaughter =
-        })*/
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert();
+            var row = grandDaughter.getRow(key, {populated: true});
+            var etalon = grandDaughter.getRow(key);
+            etalon.daughter = daughter.getRow(etalon.daughter);
+            assert.deepEqual(row, etalon);
+        });
+
+        it("Should populate tables right even if null", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert({daughter:null});
+            var row = grandDaughter.getRow(key, {populated: true});
+            var etalon = grandDaughter.getRow(key);
+            assert.deepEqual(row, etalon);
+        });
+
+        it("Should pass parameters down to dependant tables", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .finalize();
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", uuidField(), true)
+                .addField("daughter", dependencyField(daughter))
+                .finalize();
+            var key = grandDaughter.insert();
+            var row = grandDaughter.getRow(
+                key,
+                {
+                    fields:[
+                        {
+                            name:"daughter",
+                            fields:[
+                                {
+                                    name: "mother",
+                                    fields:["data"]
+                                }
+                            ],
+                            populated: true
+                        }
+                    ],
+                    populated: true
+                }
+            );
+            var etalon = grandDaughter.getRow(key, {fields:["daughter"]});
+            etalon.daughter = daughter.getRow(etalon.daughter, {fields:["mother"]});
+            etalon.daughter.mother = mother.getRow(etalon.daughter.mother, {fields:["data"]});
+            assert.deepEqual(row, etalon);
+        });
     });
 
     describe("hasRow method", function () {
@@ -268,7 +351,6 @@ describe("Table object", function () {
             var key = table.insert();
             assert.isTrue(table.hasRow(key));
         });
-
     });
 
     describe("finalize method", function () {
@@ -300,6 +382,117 @@ describe("Table object", function () {
             table.addField("uuid", uuidField(), true).finalize();
             assert.ok(table.finalized);
         });
+    });
 
+    describe("addIndex method", function () {
+        it("Should throw error if there is no field in table", function () {
+            var table = new Table("Name", new EtalonDao());
+            assert.throw(function () {
+                table.addIndex("SomeField");
+            }, DBEnvError);
+        });
+
+        it("Should create indexes field for field", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .addIndex("data")
+                .finalize();
+            var key = table.insert();
+            assert.deepEqual([key], table.indexes["data"][table.rows[key].data]);
+        });
+
+        it("Should add indexes consistently for already inserted indexes", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var key = table.insert();
+            table.addIndex("data");
+            assert.deepEqual(table.indexes["data"][table.rows[key].data], [key]);
+        });
+    });
+
+    describe("dropIndex method", function () {
+        it("Should throw error if fieldName is absent", function () {
+            var table = new Table("Name", new EtalonDao());
+            assert.throw(function () {
+                table.dropIndex("SomeField");
+            }, DBEnvError);
+        });
+
+        it("Should cleanup deleted index and preven it renewing", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .addIndex("data")
+                .finalize();
+            table.insert();
+            table.dropIndex("data");
+            table.insert();
+            assert.isUndefined(table.indexes["data"]);
+        });
+    });
+
+    describe("getRowsByIndex", function () {
+        it("Should throw error if there is no index", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            assert.throw(function () {
+                table.getRowsByIndex("data", 0);
+            }, DBEnvError);
+        });
+
+        it("Should return empty array if there is no data for value", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .addIndex("data")
+                .finalize();
+            var result = table.getRowsByIndex("data", 0);
+            assert.deepEqual(result, []);
+        });
+
+        it("Should return rows by index", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .addIndex("data")
+                .finalize();
+            var key1 = table.insert({data: 1});
+            var key2 = table.insert({data: 1});
+            table.insert({data: 2});
+            assert.deepEqual(table.getRowsByIndex("data", 1), [{id: key1, data:1}, {id:key2, data:1}]);
+        });
+
+        it("Should return rows by index populated", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", uuidField(), true)
+                .addField("data", uuidField())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", uuidField(), true)
+                .addField("mother", dependencyField(mother))
+                .addField("data", uuidField())
+                .addIndex("data")
+                .finalize();
+            var key1 = daughter.insert({data: 1});
+            var key2 = daughter.insert({data: 1});
+            daughter.insert({data: 2});
+            var element1 = daughter.getRow(key1, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
+            var element2 = daughter.getRow(key2, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
+            var result = daughter.getRowsByIndex("data", 1, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
+            assert.deepEqual(result, [element1, element2]);
+        });
     });
 });
