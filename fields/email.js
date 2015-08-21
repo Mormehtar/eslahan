@@ -1,6 +1,5 @@
-var LATIN_SYMBOLS = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-var LATIN_LENGTH = LATIN_SYMBOLS.length;
-
+var chooseLength = require("./utils/chooseLength");
+var generateString = require("./utils/generateString");
 var baseGenerator = require("./utils/baseGenerator");
 
 var defaults = {
@@ -12,26 +11,16 @@ var defaults = {
     domainTo: 3
 };
 
-function chooseLength (begin, end) {
-    return Math.floor(Math.random() * (end - begin + 1) + begin);
-}
-
-function generateString (l) {
-    var result = "";
-    var length = 0;
-    while (length < l) {
-        result += LATIN_SYMBOLS[Math.floor(Math.random() * LATIN_LENGTH)];
-        ++length;
-    }
-    return result;
-}
+var generator = generateString.generator;
+var SYMBOLS = generateString.symbols.LATIN;
 
 var specificGenerator = function (options) {
     return function () {
-        var addressLength = chooseLength(options.addressFrom, options.addressTo);
-        var serverLength = chooseLength(options.serverFrom, options.serverTo);
-        var domainLength = chooseLength(options.domainFrom, options.domainTo);
-        return generateString(addressLength) + "@" + generateString(serverLength) + "." + generateString(domainLength);
+        return generator(chooseLength(options.addressFrom, options.addressTo), SYMBOLS)
+            + "@"
+            + generator(chooseLength(options.serverFrom, options.serverTo), SYMBOLS)
+            + "."
+            + generator(chooseLength(options.domainFrom, options.domainTo), SYMBOLS);
     }
 };
 

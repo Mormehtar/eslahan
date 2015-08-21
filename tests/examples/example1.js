@@ -55,5 +55,6 @@ describe("Read me example 1", function () {
         assert.lengthOf(Object.keys(env.getTable("mother").rows), 3);
         assert.lengthOf(Object.keys(env.getTable("father").rows), 2);
         assert.lengthOf(Object.keys(env.getTable("grandFather").rows), 1);
+
     });
 });
