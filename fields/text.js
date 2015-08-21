@@ -1,4 +1,4 @@
-var chooseLength = require("./utils/chooseLength");
+var chooseFromRange = require("./utils/chooseFromRange");
 var generateString = require("./utils/generateString");
 var baseGenerator = require("./utils/baseGenerator");
 
@@ -13,7 +13,7 @@ var SYMBOLS = generateString.symbols.LATIN;
 
 var specificGenerator = function (options) {
     return  function () {
-        return generator(chooseLength(options.from, options.to), SYMBOLS);
+        return generator(chooseFromRange(options.from, options.to), SYMBOLS);
     }
 };
 

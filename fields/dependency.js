@@ -18,7 +18,7 @@ module.exports = function (table, options) {
                 return null;
             }
             var _value = {};
-            if (!(value instanceof Object)) {
+            if (!(typeof value === "object")) {
                 _value[table.key] = value;
             } else {
                 _value = value;
