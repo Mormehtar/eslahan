@@ -17,12 +17,18 @@ module.exports = function (table, options) {
             if (value == null) {
                 return null;
             }
-            var key = value[table.key];
-            if (value.hasOwnProperty(table.key) && table.hasRow(key)) {
-                var fields = Object.keys(value);
+            var _value = {};
+            if (!(value instanceof Object)) {
+                _value[table.key] = value;
+            } else {
+                _value = value;
+            }
+            var key = _value[table.key];
+            if (_value.hasOwnProperty(table.key) && table.hasRow(key)) {
+                var fields = Object.keys(_value);
                 var row = table.getRow(key, fields);
                 if (fields.some(function (field) {
-                        return row[field] != value[field];
+                        return row[field] != _value[field];
                     })) {
                     throw new DBEnvError("Dependency demands to write data to existent key: \n" + JSON.stringify(value, null, '  '));
                 }
