@@ -11,7 +11,7 @@ var EtalonDao = require("../testHelpers").tableDao;
 var pluginGenerator = require("../../plugins/oneToManyDependency");
 var REPEATS = 100;
 
-describe.only("One to many dependency plugin", function () {
+describe("One to many dependency plugin", function () {
     it("Should throw error if got not a table", function () {
         assert.throw(function () {
             pluginGenerator({}, new Table("Name", new EtalonDao()), "plugin");
@@ -187,5 +187,45 @@ describe.only("One to many dependency plugin", function () {
             user.insert({id:"SomeUser"})
         );
         assert.sameDeepMembers(elements, [right.getRow(key)]);
+    });
+
+    it("Should throw error if inconsistent data given", function () {
+        var user = new Table("user", new EtalonDao());
+        user
+            .addField("id", uuidField(), true)
+            .addField("data", uuidField())
+            .finalize();
+        var right = new Table("right", new EtalonDao());
+        right
+            .addField("id", uuidField(), true)
+            .addField("user", uuidField())
+            .finalize();
+        user.addPlugin("rights", pluginGenerator(user, right, "user"));
+        right.insert({id: "SomeUser", user:"someData"});
+        assert.throw(function () {
+            user.insert({rights: [{id:"SomethingWrong"}], id: "someData"});
+        }, DBEnvError);
+        assert.throw(function () {
+            user.insert({rights: {id:"SomethingWrong"}, id: "someData"});
+        }, DBEnvError);
+    });
+
+    it("Should throw error if inconsistent by length data given", function () {
+        var user = new Table("user", new EtalonDao());
+        user
+            .addField("id", uuidField(), true)
+            .addField("data", uuidField())
+            .finalize();
+        var right = new Table("right", new EtalonDao());
+        right
+            .addField("id", uuidField(), true)
+            .addField("user", uuidField())
+            .finalize();
+        user.addPlugin("rights", pluginGenerator(user, right, "user"));
+        right.insert({id: "SomeUser", user:"someData"});
+        right.insert({id: "SomeOtherSing", user:"someData"});
+        assert.throw(function () {
+            user.insert({rights: [{id:"SomeUser"}], id: "someData"});
+        }, DBEnvError);
     });
 });
