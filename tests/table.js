@@ -1,4 +1,5 @@
 var assert = require("chai").assert;
+var sinon = require("sinon");
 var EtalonDao = require("./testHelpers").tableDao;
 
 var Table = require("../table");
@@ -121,12 +122,36 @@ describe("Table object", function () {
             assert.deepEqual(row, table.dao.insert.firstCall.args[0]);
         });
 
-        it("Should insert givven data to fields, if provided", function () {
+        it("Should insert given data to fields, if provided", function () {
             var data = {data: "SomeUuid"};
             var table = createTestTable();
             var key = table.insert(data);
 
             assert.equal(table.rows[key].data, data.data);
+        });
+
+        it("Should call plugins", function () {
+            var plugin = sinon.spy();
+            var table = createTestTable().addPlugin("plugin", plugin);
+
+            var key = table.insert();
+
+            assert.ok(plugin.calledOnce);
+            assert.deepEqual(plugin.firstCall.thisValue, table);
+            assert.equal(plugin.firstCall.args[0], key);
+        });
+
+        it("Should pass arguments to plugins", function () {
+            var plugin = sinon.spy();
+            var table = createTestTable().addPlugin("plugin", plugin).addPlugin("otherPlugin", plugin);
+
+            var key = table.insert({plugin:"someData", otherPlugin:"someOtherData"});
+
+            assert.ok(plugin.calledTwice);
+            assert.deepEqual(plugin.firstCall.thisValue, table);
+            assert.deepEqual(plugin.secondCall.thisValue, table);
+            assert.ok(plugin.calledWithExactly(key, "someData"));
+            assert.ok(plugin.calledWithExactly(key, "someOtherData"));
         });
     });
 
@@ -493,6 +518,42 @@ describe("Table object", function () {
             var element2 = daughter.getRow(key2, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
             var result = daughter.getRowsByIndex("data", 1, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
             assert.deepEqual(result, [element1, element2]);
+        });
+    });
+
+    describe("addPlugin method", function () {
+        it("Should add plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            var plugin = function () {};
+            table.addPlugin("SomePlugin", plugin);
+            assert.equal(table.plugins.SomePlugin, plugin);
+            assert.sameMembers(table.pluginsNames, ["SomePlugin"]);
+        });
+
+        it("Should not allow add one plugin twice", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addPlugin("plugin", function () {});
+            assert.throw(function () {
+                table.addPlugin("plugin", function () {});
+            }, DBEnvError);
+        });
+    });
+
+    describe("deletePlugin method", function () {
+        it("Should throw error if there is no plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            assert.throw(function () {
+                table.deletePlugin("plugin", function () {});
+            }, DBEnvError);
+        });
+
+        it("Should clean up all tracks of plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addPlugin("SomePlugin", function () {})
+                .deletePlugin("SomePlugin");
+            assert.deepEqual(table.plugins, {});
+            assert.sameMembers(table.pluginsNames, []);
         });
     });
 });
