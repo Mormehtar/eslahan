@@ -1,9 +1,7 @@
-# Eslahan DB environment for tests.
+# Eslahan is a DB environment constructor for performing tests.
 ## Philosophy
 
-Main aim of Eslahan is to make preparing of DB for test scenarios as simple as possible to prevent ugly big presets which prevents tests independency.
-Due to Eslahan you can describe DB structure once and then insert rows in any time and be shure that you need to pass only needed data and dot pay any attention on any underling data which is not in the light spot at the moment.
-Eslahan will create any dependent rows in DB and fill all fields by given rules.
+Eslahan's main task is to simplify the process of DB preparation for testing scenarios. It allows to avoid large generalized DB conditions, which may make tests implicitly dependant. With the help of Eslahan you can describe DB structure once and insert needed data only, ignoring data not important at the given testing scenario. Eslahan will fill in all other fields according to rules specified by user.
 
 ## Installation
 
@@ -11,7 +9,7 @@ Eslahan will create any dependent rows in DB and fill all fields by given rules.
 
 ## Usage
 
-You can see usage in tests. For example:
+Usage examples can be seen in tests. For example:
 
     var TableDao = require("eslahan/tests/testHelpers").tableDao;
     var uuidField = require("eslahan/fields/uuid");
@@ -38,17 +36,17 @@ You can see usage in tests. For example:
         .addField("father", dependencyField(env.getTable("father")));
     env.finalize();
 
-Will describe system of four tables `mother` and `grandFather` consists of only one column `id` which is key generated as uuid.
-Table `father` depends on `grandFather` through its field `grandFather` and has its own key `id` generated as uuid.
-And table `daughter` depending on `mother` and `father` and having its own key `id` generated as uuid.
-And now we go to some test scenario and want to create two stepsisters.
+We've got a system of 4 tables, where `mother` and `grandFather` tables consist of single (key) column `id` each, defined within Eslahan as UUID.
+`father` table depends on `grandFather` table via `grandFather` field, and contains a key field `id` that also is defined as UUID.
+`daughter` table depends on `father` and `mother` tables via `father` and `mother` fields respectively, and contains a key field `id` that, again, is defined as UUID.
+Now, when we have described DB structure, we are able to generate easily a couple of stepsisters:
 
     var daughterTable = env.getTable("daughter");
     var sister1 = daughterTable.insert();
     var sister2 = daughterTable.insert(daughterTable.getRow(sister1, {fields: ["father"]}));
 
-And now you have two sisters with one father, one grand father and two different mothers. You have all ids and other.
-More than that you can create one other daughter whit the same grandfather and other father:
+Now we've got a couple of sisters who share one father (and one grandfather) but are born from different mothers.
+If we wish, we can generate their cousin who will share a grandfather with them, being born from different parents:
 
     var daughter = daughterTable.insert(
         daughterTable.getRow(
@@ -66,11 +64,10 @@ More than that you can create one other daughter whit the same grandfather and o
     );
 
 ## DAO and DB
-Eslahan was written for Zatanna in mind, but any DAO introducing insert method (taking an object to insert) and delete method cleaning table can be used.
-There are two things Eslahan counts on - these DAO methods are synchronous and user execute asyncronous part manually exactly when it is needed and DAO does not depends on DB mechanisms like due to id generating.
-First demand can be passed by wrapper for methods (accumulator). Second can be walked around if DB allows manual id creating by using fields like uuid or increment.
-Eslahan by default thinks that your DAO allows manipulating with tables as with dictionary. Look at previous example.
-But you can provide a function that allows choosing. Like that:
+Eslahan was created on the assumption of using `Zatanna` or any other DAO offering `insert` and `delete` methods.
+There are two key requirements one should mind when using Eslahan. First is, DAO methods should be synchronous and user has to execute async part himself right when it's needed, while the second point is that DAO must not depend on DB scripts (for example, on sequence generators).
+The first requirement is fulfilled easily by wrapping DAO methods with accumulators, while the second one can be walked around by generating sequences through JavaScript (with the help of matching field generators within Eslahan).
+By default, Eslahan takes inserted DAO as dictionary of table DAOs. However, you can delegate to Eslahan a function of table DAO choosing.
 
     var env = new DBEnv(new TableDao(), function (tableName, dao) {
         return dao;

@@ -1,4 +1,4 @@
-var chooseLength = require("./utils/chooseLength");
+var chooseFromRange = require("./utils/chooseFromRange");
 var generateString = require("./utils/generateString");
 var baseGenerator = require("./utils/baseGenerator");
 
@@ -16,11 +16,11 @@ var SYMBOLS = generateString.symbols.LATIN;
 
 var specificGenerator = function (options) {
     return function () {
-        return generator(chooseLength(options.addressFrom, options.addressTo), SYMBOLS)
+        return generator(chooseFromRange(options.addressFrom, options.addressTo), SYMBOLS)
             + "@"
-            + generator(chooseLength(options.serverFrom, options.serverTo), SYMBOLS)
+            + generator(chooseFromRange(options.serverFrom, options.serverTo), SYMBOLS)
             + "."
-            + generator(chooseLength(options.domainFrom, options.domainTo), SYMBOLS);
+            + generator(chooseFromRange(options.domainFrom, options.domainTo), SYMBOLS);
     }
 };
 
