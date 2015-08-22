@@ -1,7 +1,7 @@
 var assert = require("chai").assert;
 var moment = require("moment");
 var field = require("../../fields/datetime");
-var check = require("../testHelpers").check;
+var REPEATS = 100;
 
 describe("DateTime field", function() {
 
@@ -27,15 +27,40 @@ describe("DateTime field", function() {
 
     it("Should return NOW by default", function () {
         var f = field();
+        for (var i = REPEATS; i--;) {
+            var begin = moment().subtract(1, 'ms');
+            var result = moment(f());
+            var end = moment().add(1, 'ms');
+            assert.ok(result.isBetween(begin, end));
+        }
+    });
+
+    it("Should return result in range of nearest seven days", function () {
+        var f = field({to: moment().add(7, 'd')});
+        var end = moment().add(7, 'd').add(1, 'ms');
         var begin = moment().subtract(1, 'ms');
         var result = moment(f());
-        var end = moment().add(1, 'ms');
         assert.ok(result.isBetween(begin, end));
     });
 
-    //it("Should return result in range of nearest week if not now", function () {
-    //    var f = field();
-    //    var result = moment(f({now: false}));
-    //})
+    it("Should return result in range of previous seven days", function () {
+        var f = field({from: moment().subtract(7, 'd')});
+        var begin = moment().subtract(7, 'd').subtract(1,'ms');
+        for (var i = REPEATS; i--;) {
+            var end = moment().add(1, 'ms');
+            var result = moment(f());
+            assert.ok(result.isBetween(begin, end));
+        }
+    });
 
+    it("Should return result in given range", function () {
+        var point = moment();
+        var f = field({from: point.clone().subtract(7, 'd'), to: point.clone().add(7, 'd')});
+        var begin = point.clone().subtract(7, 'd').subtract(1,'ms');
+        var end = point.clone().add(7, 'd').add(1, 'ms');
+        for (var i = REPEATS; i--;) {
+            var result = moment(f());
+            assert.ok(result.isBetween(begin, end));
+        }
+    });
 });
