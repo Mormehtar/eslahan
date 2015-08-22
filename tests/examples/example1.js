@@ -3,8 +3,7 @@ var assert = require("chai").assert;
 describe("Read me example 1", function () {
     it("Should create stepsisters and cuisine", function () {
         var TableDao = require("../testHelpers").tableDao;
-        var uuidField = require("../../fields/uuid");
-        var dependencyField = require("../../fields/dependency");
+        var fields = require("../../fields");
 
         var DBEnv = require("../..");
 
@@ -15,16 +14,16 @@ describe("Read me example 1", function () {
             grandFather: new TableDao()
         });
         env.addTable("mother")
-            .addField("id", uuidField(), true);
-        env.addTable("grandFather", uuidField(), true)
-            .addField("id", uuidField(), true);
+            .addField("id", fields.uuid(), true);
+        env.addTable("grandFather", fields.uuid(), true)
+            .addField("id", fields.uuid(), true);
         env.addTable("father")
-            .addField("id", uuidField(), true)
-            .addField("grandFather", dependencyField(env.getTable("grandFather")));
+            .addField("id", fields.uuid(), true)
+            .addField("grandFather", fields.dependency(env.getTable("grandFather")));
         env.addTable("daughter")
-            .addField("id", uuidField(), true)
-            .addField("mother", dependencyField(env.getTable("mother")))
-            .addField("father", dependencyField(env.getTable("father")));
+            .addField("id", fields.uuid(), true)
+            .addField("mother", fields.dependency(env.getTable("mother")))
+            .addField("father", fields.dependency(env.getTable("father")));
         env.finalize();
 
         var daughterTable = env.getTable("daughter");

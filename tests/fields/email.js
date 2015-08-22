@@ -1,5 +1,6 @@
 var assert = require("chai").assert;
-var field = require("../../fields/email");
+var fields = require("../../fields");
+var field = fields.email;
 var check = require("../testHelpers").check;
 
 describe("Email field", function() {

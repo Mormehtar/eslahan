@@ -1,17 +1,18 @@
 var assert = require("chai").assert;
-var uuidField = require("../../fields/uuid");
 var Table = require("../../table");
 var EtalonDao = require("../testHelpers").tableDao;
 var DBEnvError = require("../../errors");
 
-var field = require("../../fields/multiDependency");
+var fields = require("../../fields");
+var field = fields.multiDependency;
+
 var REPEATS = 100;
 
 var testTable = function () {
     var table = new Table("Name", new EtalonDao());
     table
-        .addField("id", uuidField(), true)
-        .addField("data", uuidField())
+        .addField("id", fields.uuid(), true)
+        .addField("data", fields.uuid())
         .finalize();
     return table;
 };
@@ -42,7 +43,7 @@ describe("Multi dependency field", function() {
 
     it("Should throw error if row is a key in table", function () {
         var table = new Table("Name", new EtalonDao());
-        table.addField("id", uuidField(), true);
+        table.addField("id", fields.uuid(), true);
         assert.throw(function () {
             field(table, "id");
         }, DBEnvError);

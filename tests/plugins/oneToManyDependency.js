@@ -1,9 +1,7 @@
 var assert = require("chai").assert;
 var Table = require("../../table");
 
-var uuidField = require("../../fields/uuid");
-var dependencyField = require("../../fields/dependency");
-var multiDependencyField = require("../../fields/multiDependency");
+var fields = require("../../fields");
 
 var DBEnvError = require("../../errors");
 var EtalonDao = require("../testHelpers").tableDao;
@@ -30,7 +28,7 @@ describe("One to many dependency plugin", function () {
 
     it("Should throw error if given field is key field", function () {
         var table = new Table("Name", new EtalonDao());
-        table.addField("id", uuidField(), true);
+        table.addField("id", fields.uuid(), true);
         assert.throw(function () {
             pluginGenerator(table, table, "id");
         }, DBEnvError);
@@ -39,16 +37,16 @@ describe("One to many dependency plugin", function () {
     it("Should throw error if given baseTable is not a table plugin is attached to", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user))
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
             .finalize();
         var other = new Table("other", new EtalonDao());
         other
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         other.addPlugin("rights", pluginGenerator(user, right, "user"));
         assert.throw(function () {
@@ -59,12 +57,12 @@ describe("One to many dependency plugin", function () {
     it("should throw error if given table is not finalized", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user));
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user));
         assert.throw(function () {
             user.addPlugin("rights", pluginGenerator(user, right, "user"));
         }, DBEnvError);
@@ -73,13 +71,13 @@ describe("One to many dependency plugin", function () {
     it("Should throw error if given baseTable has loop multi dependency with given table", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", multiDependencyField(user, "data"))
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.multiDependency(user, "data"))
             .finalize();
         assert.throw(function () {
             user.addPlugin("rights", pluginGenerator(user, right, "user"));
@@ -89,12 +87,12 @@ describe("One to many dependency plugin", function () {
     it("Should create 1-3 daughter rows by default", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user))
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         for (var i = REPEATS; i--;){
@@ -106,12 +104,12 @@ describe("One to many dependency plugin", function () {
     it("Should create daughter rows in given range", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user))
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user", {from: 2, to: 4}));
         for (var i = REPEATS; i--;){
@@ -123,13 +121,13 @@ describe("One to many dependency plugin", function () {
     it("Should pass data to daughter rows", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user))
-            .addField("shortName", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
+            .addField("shortName", fields.uuid())
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         for (var i = REPEATS; i--;){
@@ -143,13 +141,13 @@ describe("One to many dependency plugin", function () {
     it("Should pass data for every daughter row if data given", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", dependencyField(user))
-            .addField("shortName", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
+            .addField("shortName", fields.uuid())
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         var elements = right.getRowsByIndex(
@@ -172,13 +170,13 @@ describe("One to many dependency plugin", function () {
     it("Should change nothing if daughter rows exist already and no data given", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.uuid())
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         var key = right.insert({user:"SomeUser"});
@@ -192,13 +190,13 @@ describe("One to many dependency plugin", function () {
     it("Should throw error if inconsistent data given", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.uuid())
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         right.insert({id: "SomeUser", user:"someData"});
@@ -213,13 +211,13 @@ describe("One to many dependency plugin", function () {
     it("Should throw error if inconsistent by length data given", function () {
         var user = new Table("user", new EtalonDao());
         user
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var right = new Table("right", new EtalonDao());
         right
-            .addField("id", uuidField(), true)
-            .addField("user", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.uuid())
             .finalize();
         user.addPlugin("rights", pluginGenerator(user, right, "user"));
         right.insert({id: "SomeUser", user:"someData"});
