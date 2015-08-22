@@ -1,6 +1,6 @@
 var Table = require("../table");
 var DBEnvError = require("../errors");
-var chooseFromRange = require("../fields/utils/chooseFromRange");
+var chooseFromRange = require("../utils/chooseFromRange");
 
 var defaults = {
     from: 1,

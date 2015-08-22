@@ -1,5 +1,5 @@
 var uuid = require("uuid").v4;
-var baseGenerator = require("./utils/baseGenerator");
+var baseGenerator = require("../utils/baseGenerator");
 
 var specificGenerator = function () { return function () { return uuid(); }; };
 

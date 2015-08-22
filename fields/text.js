@@ -1,6 +1,6 @@
-var chooseFromRange = require("./utils/chooseFromRange");
-var generateString = require("./utils/generateString");
-var baseGenerator = require("./utils/baseGenerator");
+var chooseFromRange = require("../utils/chooseFromRange");
+var generateString = require("../utils/generateString");
+var baseGenerator = require("../utils/baseGenerator");
 
 var defaults = {
     from: 2,

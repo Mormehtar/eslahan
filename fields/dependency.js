@@ -1,7 +1,7 @@
 var Table = require("../table");
 var DBEnvError = require("../errors");
 
-var baseGenerator = require("./utils/baseGenerator");
+var baseGenerator = require("../utils/baseGenerator");
 
 module.exports = function (table, options) {
     if (!table || !(table instanceof Table)) {
