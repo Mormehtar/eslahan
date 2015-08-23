@@ -1,5 +1,6 @@
 var assert = require("chai").assert;
-var field = require("../../fields/uuid");
+var fields = require("../..").fields;
+var field = fields.uuid;
 var check = require("../testHelpers").check;
 
 describe("Uuid field", function() {

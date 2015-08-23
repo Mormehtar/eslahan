@@ -1,10 +1,10 @@
-var baseGenerator = require("./utils/baseGenerator");
+var baseGenerator = require("../utils/baseGenerator");
 var moment = require("moment");
-var chooseFromRange = require("./utils/chooseFromRange");
+var chooseFromRange = require("../utils/chooseFromRange");
 
 var defaults = {
     from: null,
-    to: null,
+    to: null
 };
 
 var specificGenerator = function (options) {

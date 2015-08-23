@@ -1,4 +1,4 @@
-var DBEnvError = require("../errors");
+var DBEnvError = require("../../main/error");
 var assert = require("chai").assert;
 
 describe("Error", function () {

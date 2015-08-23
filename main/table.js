@@ -1,4 +1,4 @@
-var DBEnvError = require("./errors");
+var DBEnvError = require("./error");
 
 function Table (name, dao) {
     if (arguments.length != 2) {
@@ -14,6 +14,8 @@ function Table (name, dao) {
     this.rows = {};
     this.finalized = false;
     this.indexes = {};
+    this.pluginsNames = [];
+    this.plugins = {};
 }
 
 module.exports = Table;
@@ -40,11 +42,11 @@ Table.prototype.insert = function (data) {
     if (!this.finalized) {
         throw new DBEnvError("Can`t insert row into not finalized table");
     }
-    var _data = data || {};
+    data = data || {};
     var self = this;
     var fields = Object.keys(this.fields);
     var insertObject = fields.reduce(function (obj, fieldName) {
-        obj[fieldName] = _data.hasOwnProperty(fieldName) ? self.fields[fieldName](_data[fieldName]) : self.fields[fieldName]();
+        obj[fieldName] = data.hasOwnProperty(fieldName) ? self.fields[fieldName](data[fieldName]) : self.fields[fieldName]();
         return obj;
     }, {});
     self.dao.insert(insertObject);
@@ -55,6 +57,9 @@ Table.prototype.insert = function (data) {
         }
     });
     self.rows[key] = insertObject;
+    self.pluginsNames.forEach(function (pluginName) {
+        self.plugins[pluginName].call(self, key, data[pluginName]);
+    });
     return key;
 };
 
@@ -159,4 +164,22 @@ Table.prototype.getRowsByIndex = function (fieldName, fieldValue, options) {
     return this.indexes[fieldName][fieldValue].map(function (key) {
         return self.getRow(key, options);
     });
+};
+
+Table.prototype.addPlugin = function (name, plugin) {
+    if (this.plugins[name]) {
+        throw new DBEnvError("Plugin " + name + "already existent");
+    }
+    this.plugins[name] = plugin;
+    this.pluginsNames.push(name);
+    return this;
+};
+
+Table.prototype.deletePlugin = function (name) {
+    if (this.plugins[name]) {
+        delete this.plugins[name];
+        this.pluginsNames.splice(this.pluginsNames.indexOf(name), 1);
+        return this;
+    }
+    throw new DBEnvError("Plugin " + name + "is absent");
 };

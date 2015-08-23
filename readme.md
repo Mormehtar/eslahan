@@ -12,10 +12,9 @@ Eslahan's main task is to simplify the process of DB preparation for testing sce
 Usage examples can be seen in tests. For example:
 
     var TableDao = require("eslahan/tests/testHelpers").tableDao;
-    var uuidField = require("eslahan/fields/uuid");
-    var dependencyField = require("eslahan/fields/dependency");
-
-    var DBEnv = require("eslahan");
+    var eslahan = require("eslahan");
+    var fields = eslahan.fields;
+    var DBEnv = eslahan.DBEnv;
 
     var env = new DBEnv({
         mother: new TableDao(),
@@ -24,16 +23,16 @@ Usage examples can be seen in tests. For example:
         grandFather: new TableDao()
     });
     env.addTable("mother")
-        .addField("id", uuidField(), true);
-    env.addTable("grandFather", uuidField(), true)
-        .addField("id", uuidField(), true);
+        .addField("id", fields.uuid(), true);
+    env.addTable("grandFather", fields.uuid(), true)
+        .addField("id", fields.uuid(), true);
     env.addTable("father")
-        .addField("id", uuidField(), true)
-        .addField("grandFather", dependencyField(env.getTable("grandFather")));
+        .addField("id", fields.uuid(), true)
+        .addField("grandFather", fields.dependency(env.getTable("grandFather")));
     env.addTable("daughter")
-        .addField("id", uuidField(), true)
-        .addField("mother", dependencyField(env.getTable("mother")))
-        .addField("father", dependencyField(env.getTable("father")));
+        .addField("id", fields.uuid(), true)
+        .addField("mother", fields.dependency(env.getTable("mother")))
+        .addField("father", fields.dependency(env.getTable("father")));
     env.finalize();
 
 We've got a system of 4 tables, where `mother` and `grandFather` tables consist of single (key) column `id` each, defined within Eslahan as UUID.

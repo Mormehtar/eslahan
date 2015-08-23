@@ -1,12 +1,12 @@
 var assert = require("chai").assert;
 
-var TableDao = require("./testHelpers").tableDao;
-var Table = require("../table");
-var DBEnvError = require("../errors");
-var uuidField = require("../fields/uuid");
-var dependencyField = require("../fields/dependency");
+var TableDao = require("./../testHelpers").tableDao;
+var Table = require("../../main/table");
+var eslahan = require("../..");
+var DBEnvError = eslahan.DBEnvError;
+var fields = eslahan.fields;
 
-var DBEnv = require("..");
+var DBEnv = eslahan.DBEnv;
 
 describe("DBEnv object", function () {
 
@@ -81,7 +81,7 @@ describe("DBEnv object", function () {
         it("Should finalize all tables", function () {
             var env = new DBEnv({"SomeTable": new TableDao()});
             var table = env.addTable("SomeTable");
-            table.addField("id", uuidField(), true);
+            table.addField("id", fields.uuid(), true);
             env.finalize();
             assert.ok(table.finalized);
         });
@@ -90,8 +90,8 @@ describe("DBEnv object", function () {
             var env = new DBEnv({Daughter: new TableDao()});
             var mother = new Table("Mother", new TableDao());
             env.addTable("Daughter")
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother));
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother));
             assert.throw(function () {
                 env.finalize();
             }, DBEnvError);
@@ -103,18 +103,18 @@ describe("DBEnv object", function () {
                 mother: dao, father: dao, daughter: dao, grandFather: dao, someOther: dao
             });
             env.addTable("mother")
-                .addField("id", uuidField(), true);
-            env.addTable("grandFather", uuidField(), true)
-                .addField("id", uuidField(), true);
+                .addField("id", fields.uuid(), true);
+            env.addTable("grandFather", fields.uuid(), true)
+                .addField("id", fields.uuid(), true);
             env.addTable("someOther")
-                .addField("id", uuidField(), true);
+                .addField("id", fields.uuid(), true);
             env.addTable("father")
-                .addField("id", uuidField(), true)
-                .addField("grandFather", dependencyField(env.getTable("grandFather")));
+                .addField("id", fields.uuid(), true)
+                .addField("grandFather", fields.dependency(env.getTable("grandFather")));
             env.addTable("daughter")
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(env.getTable("mother")))
-                .addField("father", dependencyField(env.getTable("father")));
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(env.getTable("mother")))
+                .addField("father", fields.dependency(env.getTable("father")));
             env.finalize();
 
             assert.equal(env.tables["mother"].priority, 0);
@@ -129,18 +129,18 @@ describe("DBEnv object", function () {
                 return dao;
             });
             env.addTable("mother")
-                .addField("id", uuidField(), true);
-            env.addTable("grandFather", uuidField(), true)
-                .addField("id", uuidField(), true);
+                .addField("id", fields.uuid(), true);
+            env.addTable("grandFather", fields.uuid(), true)
+                .addField("id", fields.uuid(), true);
             env.addTable("someOther")
-                .addField("id", uuidField(), true);
+                .addField("id", fields.uuid(), true);
             env.addTable("father")
-                .addField("id", uuidField(), true)
-                .addField("grandFather", dependencyField(env.getTable("grandFather")));
+                .addField("id", fields.uuid(), true)
+                .addField("grandFather", fields.dependency(env.getTable("grandFather")));
             env.addTable("daughter")
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(env.getTable("mother")))
-                .addField("father", dependencyField(env.getTable("father")));
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(env.getTable("mother")))
+                .addField("father", fields.dependency(env.getTable("father")));
             env.finalize();
             assert.sameMembers(env.tableOrder, Object.keys(env.tables));
             assert.ok(env.tableOrder.indexOf("daughter") > env.tableOrder.indexOf("father"));
@@ -167,16 +167,16 @@ describe("DBEnv object", function () {
                 grandFather: new TableDao()
             });
             env.addTable("mother")
-                .addField("id", uuidField(), true);
-            env.addTable("grandFather", uuidField(), true)
-                .addField("id", uuidField(), true);
+                .addField("id", fields.uuid(), true);
+            env.addTable("grandFather", fields.uuid(), true)
+                .addField("id", fields.uuid(), true);
             env.addTable("father")
-                .addField("id", uuidField(), true)
-                .addField("grandFather", dependencyField(env.getTable("grandFather")));
+                .addField("id", fields.uuid(), true)
+                .addField("grandFather", fields.dependency(env.getTable("grandFather")));
             env.addTable("daughter")
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(env.getTable("mother")))
-                .addField("father", dependencyField(env.getTable("father")));
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(env.getTable("mother")))
+                .addField("father", fields.dependency(env.getTable("father")));
             env.finalize();
             env.getTable("daughter").insert();
             env.cleanup();

@@ -1,10 +1,11 @@
 var assert = require("chai").assert;
-var uuidField = require("../../fields/uuid");
-var Table = require("../../table");
+var Table = require("../../main/table");
 var EtalonDao = require("../testHelpers").tableDao;
-var DBEnvError = require("../../errors");
+var eslahan = require("../..");
+var DBEnvError = eslahan.DBEnvError;
 
-var field = require("../../fields/dependency");
+var fields = eslahan.fields;
+var field = fields.dependency;
 
 describe("Dependency field", function() {
 
@@ -31,7 +32,7 @@ describe("Dependency field", function() {
 
     it("Should create row in dependent table", function () {
         var table = new Table("Name", new EtalonDao());
-        table.addField("id", uuidField(), true).finalize();
+        table.addField("id", fields.uuid(), true).finalize();
         var f = field(table);
         var key = f();
         assert.ok(table.hasRow(key));
@@ -40,8 +41,8 @@ describe("Dependency field", function() {
     it("Should create row in dependent table with provided data", function () {
         var table = new Table("Name", new EtalonDao());
         table
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var f = field(table);
         var key = f({data:"SomeData"});
@@ -51,8 +52,8 @@ describe("Dependency field", function() {
     it("Should use row if it present already", function () {
         var table = new Table("Name", new EtalonDao());
         table
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var f = field(table);
         var key = table.insert();
@@ -64,8 +65,8 @@ describe("Dependency field", function() {
     it("Should throw error if non key data try to be overwritten", function () {
         var table = new Table("Name", new EtalonDao());
         table
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var f = field(table);
         var key = table.insert();
@@ -77,12 +78,12 @@ describe("Dependency field", function() {
     it("Should be transitional", function () {
         var mother = new Table("Mother", new EtalonDao());
         mother
-            .addField("id", uuidField(), true)
-            .addField("data", uuidField())
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
             .finalize();
         var daughter = new Table("Daughter", new EtalonDao());
         daughter
-            .addField("id", uuidField(), true)
+            .addField("id", fields.uuid(), true)
             .addField("mother", field(mother))
             .finalize();
 

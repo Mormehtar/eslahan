@@ -1,12 +1,13 @@
 var assert = require("chai").assert;
-var EtalonDao = require("./testHelpers").tableDao;
+var sinon = require("sinon");
+var EtalonDao = require("./../testHelpers").tableDao;
 
-var Table = require("../table");
+var Table = require("../../main/table");
 
-var uuidField = require("../fields/uuid");
-var dependencyField = require("../fields/dependency");
-var multiDependencyField = require("../fields/multiDependency");
-var DBEnvError = require("../errors");
+var eslahan = require("../..");
+var fields = eslahan.fields;
+var uuidField = fields.uuid;
+var DBEnvError = eslahan.DBEnvError;
 
 function createTestTable () {
     var table = new Table("TestTeable", new EtalonDao());
@@ -59,9 +60,9 @@ describe("Table object", function () {
     describe("addField method", function () {
         it("Should add field correctly", function () {
             var table = new Table("TestTable", new EtalonDao());
-            var generator = uuidField();
-            var generatorKey = uuidField();
-            var generator2 = uuidField();
+            var generator = fields.uuid();
+            var generatorKey = fields.uuid();
+            var generator2 = fields.uuid();
 
             table
                 .addField("uuid1", generator)
@@ -76,11 +77,11 @@ describe("Table object", function () {
 
         it("Should not add fields to finalized table", function () {
             var table = new Table("TestTable", new EtalonDao());
-            table.addField("id", uuidField(), true);
+            table.addField("id", fields.uuid(), true);
             table.finalize();
 
             assert.throw(function () {
-                table.addField("id2", uuidField());
+                table.addField("id2", fields.uuid());
             }, DBEnvError);
         });
     });
@@ -89,7 +90,7 @@ describe("Table object", function () {
 
         it("Should fail if table is not finalized", function () {
             var table = new Table("TestTable", new EtalonDao());
-            table.addField("uuid", uuidField, true);
+            table.addField("uuid", fields.uuid(), true);
 
             assert.throw(function () {
                 table.insert();
@@ -121,12 +122,36 @@ describe("Table object", function () {
             assert.deepEqual(row, table.dao.insert.firstCall.args[0]);
         });
 
-        it("Should insert givven data to fields, if provided", function () {
+        it("Should insert given data to fields, if provided", function () {
             var data = {data: "SomeUuid"};
             var table = createTestTable();
             var key = table.insert(data);
 
             assert.equal(table.rows[key].data, data.data);
+        });
+
+        it("Should call plugins", function () {
+            var plugin = sinon.spy();
+            var table = createTestTable().addPlugin("plugin", plugin);
+
+            var key = table.insert();
+
+            assert.ok(plugin.calledOnce);
+            assert.deepEqual(plugin.firstCall.thisValue, table);
+            assert.equal(plugin.firstCall.args[0], key);
+        });
+
+        it("Should pass arguments to plugins", function () {
+            var plugin = sinon.spy();
+            var table = createTestTable().addPlugin("plugin", plugin).addPlugin("otherPlugin", plugin);
+
+            var key = table.insert({plugin:"someData", otherPlugin:"someOtherData"});
+
+            assert.ok(plugin.calledTwice);
+            assert.deepEqual(plugin.firstCall.thisValue, table);
+            assert.deepEqual(plugin.secondCall.thisValue, table);
+            assert.ok(plugin.calledWithExactly(key, "someData"));
+            assert.ok(plugin.calledWithExactly(key, "someOtherData"));
         });
     });
 
@@ -134,7 +159,7 @@ describe("Table object", function () {
 
         it("Should fail on not finalized tables", function () {
             var table = new Table("SomeName", new EtalonDao());
-            table.addField("id", uuidField(), true);
+            table.addField("id", fields.uuid(), true);
 
             assert.throw(function () {
                 table.cleanup();
@@ -170,7 +195,7 @@ describe("Table object", function () {
 
         it("Should fail if keyfield is absent", function () {
             var table = new Table("SomeName", new EtalonDao());
-            table.addField("id", uuidField());
+            table.addField("id", fields.uuid());
             assert.throw(function () {
                 table.setKey("uuid");
             }, DBEnvError);
@@ -178,7 +203,7 @@ describe("Table object", function () {
 
         it("Should set key field correctly", function () {
             var table = new Table("SomeName", new EtalonDao());
-            table.addField("id", uuidField());
+            table.addField("id", fields.uuid());
             table.setKey("id");
             assert.equal(table.key, "id");
         });
@@ -220,13 +245,13 @@ describe("Table object", function () {
         it("Should populate if demanded row", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother))
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
                 .finalize();
             var key = daughter.insert();
             var row = daughter.getRow(key, {populated: true});
@@ -238,13 +263,13 @@ describe("Table object", function () {
         it("Should populate if has multi dependency", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mothers", multiDependencyField(mother, "data"))
+                .addField("id", fields.uuid(), true)
+                .addField("mothers", fields.multiDependency(mother, "data"))
                 .finalize();
             var key = daughter.insert();
             var etalon = daughter.getRow(key, {fields:["mothers"]});
@@ -255,18 +280,18 @@ describe("Table object", function () {
         it("Should not populate dependent tables without demand", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother))
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
                 .finalize();
             var grandDaughter = new Table("Granddaughter", new EtalonDao());
             grandDaughter
-                .addField("id", uuidField(), true)
-                .addField("daughter", dependencyField(daughter))
+                .addField("id", fields.uuid(), true)
+                .addField("daughter", fields.dependency(daughter))
                 .finalize();
             var key = grandDaughter.insert();
             var row = grandDaughter.getRow(key, {populated: true});
@@ -278,18 +303,18 @@ describe("Table object", function () {
         it("Should populate tables right even if null", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother))
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
                 .finalize();
             var grandDaughter = new Table("Granddaughter", new EtalonDao());
             grandDaughter
-                .addField("id", uuidField(), true)
-                .addField("daughter", dependencyField(daughter))
+                .addField("id", fields.uuid(), true)
+                .addField("daughter", fields.dependency(daughter))
                 .finalize();
             var key = grandDaughter.insert({daughter:null});
             var row = grandDaughter.getRow(key, {populated: true});
@@ -300,18 +325,18 @@ describe("Table object", function () {
         it("Should pass parameters down to dependant tables", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother))
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
                 .finalize();
             var grandDaughter = new Table("Granddaughter", new EtalonDao());
             grandDaughter
-                .addField("id", uuidField(), true)
-                .addField("daughter", dependencyField(daughter))
+                .addField("id", fields.uuid(), true)
+                .addField("daughter", fields.dependency(daughter))
                 .finalize();
             var key = grandDaughter.insert();
             var row = grandDaughter.getRow(
@@ -371,7 +396,7 @@ describe("Table object", function () {
 
         it("Should throw error if there is no key field", function () {
             var table = new Table("Name", new EtalonDao());
-            table.addField("uuid", uuidField());
+            table.addField("uuid", fields.uuid());
             assert.throw(function () {
                 table.finalize();
             }, DBEnvError);
@@ -379,7 +404,7 @@ describe("Table object", function () {
 
         it("Should finalize table correctly", function () {
             var table = new Table("Name", new EtalonDao());
-            table.addField("uuid", uuidField(), true).finalize();
+            table.addField("uuid", fields.uuid(), true).finalize();
             assert.ok(table.finalized);
         });
     });
@@ -395,8 +420,8 @@ describe("Table object", function () {
         it("Should create indexes field for field", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .addIndex("data")
                 .finalize();
             var key = table.insert();
@@ -406,8 +431,8 @@ describe("Table object", function () {
         it("Should add indexes consistently for already inserted indexes", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var key = table.insert();
             table.addIndex("data");
@@ -426,8 +451,8 @@ describe("Table object", function () {
         it("Should cleanup deleted index and preven it renewing", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .addIndex("data")
                 .finalize();
             table.insert();
@@ -441,8 +466,8 @@ describe("Table object", function () {
         it("Should throw error if there is no index", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             assert.throw(function () {
                 table.getRowsByIndex("data", 0);
@@ -452,8 +477,8 @@ describe("Table object", function () {
         it("Should return empty array if there is no data for value", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .addIndex("data")
                 .finalize();
             var result = table.getRowsByIndex("data", 0);
@@ -463,8 +488,8 @@ describe("Table object", function () {
         it("Should return rows by index", function () {
             var table = new Table("Name", new EtalonDao());
             table
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .addIndex("data")
                 .finalize();
             var key1 = table.insert({data: 1});
@@ -476,14 +501,14 @@ describe("Table object", function () {
         it("Should return rows by index populated", function () {
             var mother = new Table("Mother", new EtalonDao());
             mother
-                .addField("id", uuidField(), true)
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
                 .finalize();
             var daughter = new Table("Daughter", new EtalonDao());
             daughter
-                .addField("id", uuidField(), true)
-                .addField("mother", dependencyField(mother))
-                .addField("data", uuidField())
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
+                .addField("data", fields.uuid())
                 .addIndex("data")
                 .finalize();
             var key1 = daughter.insert({data: 1});
@@ -493,6 +518,42 @@ describe("Table object", function () {
             var element2 = daughter.getRow(key2, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
             var result = daughter.getRowsByIndex("data", 1, {fields: ["id", {name: "mother", fields:["data"]}], populated: true});
             assert.deepEqual(result, [element1, element2]);
+        });
+    });
+
+    describe("addPlugin method", function () {
+        it("Should add plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            var plugin = function () {};
+            table.addPlugin("SomePlugin", plugin);
+            assert.equal(table.plugins.SomePlugin, plugin);
+            assert.sameMembers(table.pluginsNames, ["SomePlugin"]);
+        });
+
+        it("Should not allow add one plugin twice", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addPlugin("plugin", function () {});
+            assert.throw(function () {
+                table.addPlugin("plugin", function () {});
+            }, DBEnvError);
+        });
+    });
+
+    describe("deletePlugin method", function () {
+        it("Should throw error if there is no plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            assert.throw(function () {
+                table.deletePlugin("plugin", function () {});
+            }, DBEnvError);
+        });
+
+        it("Should clean up all tracks of plugin", function () {
+            var table = new Table("Name", new EtalonDao());
+            table
+                .addPlugin("SomePlugin", function () {})
+                .deletePlugin("SomePlugin");
+            assert.deepEqual(table.plugins, {});
+            assert.sameMembers(table.pluginsNames, []);
         });
     });
 });

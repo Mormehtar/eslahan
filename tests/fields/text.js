@@ -1,5 +1,6 @@
 var assert = require("chai").assert;
-var field = require("../../fields/text");
+var fields = require("../..").fields;
+var field = fields.text;
 var check = require("../testHelpers").check;
 
 describe("Text field", function() {
