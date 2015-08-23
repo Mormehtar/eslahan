@@ -123,7 +123,7 @@ Table.prototype.finalize = function () {
     if (!key || !this.fields[key]) {
         throw new DBEnvError("Can`t finalize table without key field");
     }
-    return this.finalized = true;
+    this.finalized = true;
 };
 
 Table.prototype.addIndex = function (fieldName) {
