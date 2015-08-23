@@ -23,17 +23,27 @@ module.exports = function (table, fieldName, options) {
                 return null;
             }
             var number = Math.floor(Math.random() * (options.to - options.from + 1)) + options.from;
-            var data;
+            var data, first;
             if (arguments.length === 0) {
                 if (number === 0) {
                     return null;
                 }
-                var first = table.insert();
+                first = table.insert();
                 data = table.getRow(first, {fields: [fieldName]});
                 --number;
             } else {
-                data = {};
-                data[fieldName] = value;
+                if (typeof value == "object" && !(value instanceof Date)) {
+                    if (value.hasOwnProperty(fieldName)) {
+                        data = value;
+                    } else {
+                        first = table.insert(value);
+                        data = value;
+                        data[fieldName] = table.getRow(first, {fields: [fieldName]})[fieldName];
+                    }
+                } else {
+                    data = {};
+                    data[fieldName] = value;
+                }
             }
             while (number--) {
                 table.insert(data);

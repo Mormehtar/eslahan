@@ -104,6 +104,20 @@ describe("Multi dependency field", function() {
     });
 
     it("Should pass data to daughter rows", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .addField("other", fields.uuid())
+            .finalize();
+        var f = field(table, "data", {from:2, to:2});
+        var value = f({other: 1, data:"SomeData"});
+        assert.equal(value, "SomeData");
+        var result = table.getRowsByIndex("data", value, {fields:["other", "data"]});
+        assert.sameDeepMembers(result, [{other: 1, data:"SomeData"}, {other:1, data:"SomeData"}]);
+    });
+
+    it("Should pass data to daughter rows by array", function () {
         var table = testTable();
         var f = field(table, "data");
         var value = f([{id: 1, data:"SomeData"}, {id:2}]);
@@ -112,7 +126,7 @@ describe("Multi dependency field", function() {
         assert.sameDeepMembers(result, [{id: 1, data:"SomeData"}, {id:2, data:"SomeData"}]);
     });
 
-    it("Should pass data to daughter rows only once if they a tha same", function () {
+    it("Should pass data to daughter rows only once if they are the same", function () {
         var table = testTable();
         var f = field(table, "data");
         f([{id: 1, data: "SomeData"}, {id: 2}]);
