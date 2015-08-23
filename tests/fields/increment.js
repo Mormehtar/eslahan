@@ -2,7 +2,7 @@ var assert = require("chai").assert;
 var fields = require("../..").fields;
 var field = fields.increment;
 
-describe("Uuid field", function() {
+describe("Increment field", function() {
 
     it("Should exist", function () {
         assert.isFunction(field);
