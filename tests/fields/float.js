@@ -1,10 +1,10 @@
 var assert = require("chai").assert;
 var fields = require("../..").fields;
-var field = fields.int;
+var field = fields.float;
 
 var REPEATS = 100;
 
-describe("int field", function() {
+describe("float field", function() {
 
     it("Should exist", function () {
         assert.isFunction(field);
@@ -22,23 +22,21 @@ describe("int field", function() {
         assert.isUndefined(field()(undefined));
     });
 
-    it("Should return integers from 0 to 100 by default", function () {
+    it("Should return number from 0 to 100 by default", function () {
         var f = field();
         for(var i = REPEATS; i--;) {
             var result = f();
             assert.ok(result >= 0, "Negative result!");
             assert.ok(result <= 100, "Too big result!");
-            assert.equal(result, Math.floor(result));
         }
     });
 
-    it("Should return integers in given range", function () {
+    it("Should return number in given range", function () {
         var f = field({from: 5, to: 20});
         for(var i = REPEATS; i--;) {
             var result = f();
             assert.ok(result >= 5, "Negative result!");
             assert.ok(result <= 20, "Too big result!");
-            assert.equal(result, Math.floor(result));
         }
     });
 });
