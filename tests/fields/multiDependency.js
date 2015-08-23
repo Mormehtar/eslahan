@@ -1,9 +1,10 @@
 var assert = require("chai").assert;
-var Table = require("../../table");
+var Table = require("../../main/table");
 var EtalonDao = require("../testHelpers").tableDao;
-var DBEnvError = require("../../errors");
+var eslahan = require("../..");
+var DBEnvError = eslahan.DBEnvError;
 
-var fields = require("../../fields");
+var fields = eslahan.fields;
 var field = fields.multiDependency;
 
 var REPEATS = 100;

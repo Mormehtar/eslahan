@@ -1,12 +1,13 @@
 var assert = require("chai").assert;
 var sinon = require("sinon");
-var EtalonDao = require("./testHelpers").tableDao;
+var EtalonDao = require("./../testHelpers").tableDao;
 
-var Table = require("../table");
+var Table = require("../../main/table");
 
-var uuidField = require("../fields/uuid");
-var fields = require("../fields");
-var DBEnvError = require("../errors");
+var eslahan = require("../..");
+var fields = eslahan.fields;
+var uuidField = fields.uuid;
+var DBEnvError = eslahan.DBEnvError;
 
 function createTestTable () {
     var table = new Table("TestTeable", new EtalonDao());

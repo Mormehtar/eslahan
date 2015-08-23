@@ -3,9 +3,9 @@ var assert = require("chai").assert;
 describe("Read me example 1", function () {
     it("Should create stepsisters and cuisine", function () {
         var TableDao = require("../testHelpers").tableDao;
-        var fields = require("../../fields");
-
-        var DBEnv = require("../..");
+        var eslahan = require("../..");
+        var fields = eslahan.fields;
+        var DBEnv = eslahan.DBEnv;
 
         var env = new DBEnv({
             mother: new TableDao(),

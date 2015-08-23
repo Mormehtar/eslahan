@@ -1,4 +1,4 @@
-var DBEnvError = require("./errors");
+var DBEnvError = require("./error");
 
 function Table (name, dao) {
     if (arguments.length != 2) {

@@ -1,11 +1,12 @@
 var assert = require("chai").assert;
 
-var TableDao = require("./testHelpers").tableDao;
-var Table = require("../table");
-var DBEnvError = require("../errors");
-var fields = require("../fields");
+var TableDao = require("./../testHelpers").tableDao;
+var Table = require("../../main/table");
+var eslahan = require("../..");
+var DBEnvError = eslahan.DBEnvError;
+var fields = eslahan.fields;
 
-var DBEnv = require("..");
+var DBEnv = eslahan.DBEnv;
 
 describe("DBEnv object", function () {
 

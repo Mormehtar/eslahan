@@ -1,12 +1,13 @@
 var assert = require("chai").assert;
-var Table = require("../../table");
+var Table = require("../../main/table");
 
-var fields = require("../../fields");
+var eslahan = require("../..");
+var fields = eslahan.fields;
 
-var DBEnvError = require("../../errors");
+var DBEnvError = eslahan.DBEnvError;
 var EtalonDao = require("../testHelpers").tableDao;
 
-var pluginGenerator = require("../../plugins/oneToManyDependency");
+var pluginGenerator = eslahan.plugins.oneToManyDependency;
 var REPEATS = 100;
 
 describe("One to many dependency plugin", function () {

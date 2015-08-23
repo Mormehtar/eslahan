@@ -1,6 +1,6 @@
 var assert = require("chai").assert;
 var moment = require("moment");
-var fields = require("../../fields");
+var fields = require("../..").fields;
 var field = fields.datetime;
 var REPEATS = 100;
 

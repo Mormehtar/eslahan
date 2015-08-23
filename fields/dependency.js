@@ -1,5 +1,5 @@
-var Table = require("../table");
-var DBEnvError = require("../errors");
+var Table = require("../main/table");
+var DBEnvError = require("../main/error");
 
 var baseGenerator = require("../utils/baseGenerator");
 

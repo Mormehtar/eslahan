@@ -12,9 +12,9 @@ Eslahan's main task is to simplify the process of DB preparation for testing sce
 Usage examples can be seen in tests. For example:
 
     var TableDao = require("eslahan/tests/testHelpers").tableDao;
-    var fields = require("eslahan/fields");
-
-    var DBEnv = require("eslahan");
+    var eslahan = require("eslahan");
+    var fields = eslahan.fields;
+    var DBEnv = eslahan.DBEnv;
 
     var env = new DBEnv({
         mother: new TableDao(),
