@@ -213,3 +213,33 @@ Example:
 Defines string field. Returns string of latin characters of length in range from `from` to `to`. By default 2-8.
 ####uuid() -> fieldGenerator
 Defines uuid field. Generating uuid.
+
+###Plugins
+Is a collection of plugins for Tables. Plugins allow to make some action on insertion to Table. They are available by `eslahan.plugins`.
+####oneToManyDependency(baseTable, table, fieldName, options) -> pluginFunction
+Describes reversed one to many dependency, when for example one table has dependency on the other (and allows it to be many to one dependency) but it is easier to insert data int dependent table. For example:
+
+    var TableDao = require("eslahan/tests/testHelpers").tableDao;
+    var eslahan = require("eslahan");
+    var DBEnv = eslahan.DBEnv;
+    var env = new DBEnv(new TableDao(), function (tableName, dao) {
+        return dao;
+    });
+
+    var user = env.addTable("user");
+    user
+        .addField("id", eslahan.fields.uuid(), true)
+        .finalize();
+    var right = env.addTable("right");
+    right
+        .addField("id", eslahan.fields.uuid(), true)
+        .addField("user", eslahan.fields.dependency(user))
+        .addField("shortName", eslahan.fields.uuid())
+        .finalize();
+    user.addPlugin("rights", pluginGenerator(user, right, "user", {from 2, to: 3}));
+
+    var key = user.insert({rights:{shortName:"SomeName"}});
+    var elements = right.getRowsByIndex("user", key, {fields:["shortName"]});
+
+Here would be created `user` row and 2-3 `right` rows with `shortName="SomeName"`.
+You must pass baseTable to oneToMany plugin just for security checks, it never used in process. It's important not to allow loop many to one dependency. You can pass values for plugin creating tables passing parameter equal to plugin name in value object.
