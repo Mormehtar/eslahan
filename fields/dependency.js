@@ -3,7 +3,7 @@ var DBEnvError = require("../main/error");
 
 var baseGenerator = require("../utils/baseGenerator");
 
-module.exports = function (table, options) {
+module.exports = function (table) {
     if (!table || !(table instanceof Table)) {
         throw new DBEnvError("Expect Table instance as parameter");
     }
@@ -18,7 +18,7 @@ module.exports = function (table, options) {
                 return null;
             }
             var _value = {};
-            if (!(typeof value === "object")) {
+            if (!(typeof value === "object") || (value instanceof Date)) {
                 _value[table.key] = value;
             } else {
                 _value = value;
@@ -39,7 +39,6 @@ module.exports = function (table, options) {
     };
 
     var result = baseGenerator({
-        options: options,
         specificGenerator: specificGenerator,
         converterGenerator:converterGenerator
     });
