@@ -212,7 +212,42 @@ Example:
 ####text(options) -> fieldGenerator
 Defines string field. Returns string of latin characters of length in range from `from` to `to`. By default 2-8.
 ####uuid() -> fieldGenerator
-Defines uuid field. Generating uuid.
+Defines UUID field. Generating uuid.
+####json() -> fieldGenerator
+Defines JSON field. Returns json string made using `template`. Template is an object, defining objects that may be in your JSON by default. Default `template` defines JSON of empty string.
+`template` consists of fields with objects which may have up to three fields: `probability` describes probability of this field, if omitted field will be generated always, `generator` describes generator function, or object, describing template of object in this field, `value` value in this field if `generator` and `field` a both presented in object - `value` would be passed to `generator`. Also if you don't need `generator` and `probability` and your `value` not an object - you may path it directly to field.
+
+    var fields = require("eslahan").fields;
+    var field = fields.json({
+        template: {
+            fieldOne: 1,
+            fieldTwo: { generator: fields.uuid() },
+            fieldThree: { value: 25, probability: 0.5 },
+            fieldFour: { generator: fields.uuid(), value: 5 },
+            complexField: {
+                generator: {
+                    fieldFive: 5,
+                    fieldSix: { value: 6 }
+                }
+            }
+        }
+    });
+    var result = field();
+
+Will generate JSON of objects like
+
+    {
+        fieldOne: 1,
+        fieldTwo: 'Some UUID here',
+        fieldThree: 25,
+        fieldFour: 5,
+        complexField: {
+            fieldFive: 5,
+            fieldSix: 6
+        }
+    }
+
+`fieldThree` will appear only in half objects, `fieldTwo` will be some real UUID, `fieldFour` always equal to `5` because UUID generator passes it. 
 
 ###Plugins
 Is a collection of plugins for Tables. Plugins allow to make some action on insertion to Table. They are available by `eslahan.plugins`.
