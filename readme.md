@@ -213,7 +213,7 @@ Example:
 Defines string field. Returns string of latin characters of length in range from `from` to `to`. By default 2-8.
 ####uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
-####json() -> fieldGenerator
+####json() -> fieldGenerator (new in `0.1.6`)
 Defines JSON field. Returns json string made using `template`. Template is an object, defining objects that may be in your JSON by default. Default `template` defines JSON of empty string.
 `template` consists of fields with objects which may have up to three fields: `probability` describes probability of this field, if omitted field will be generated always, `generator` describes generator function, or object, describing template of object in this field, `value` value in this field if `generator` and `field` a both presented in object - `value` would be passed to `generator`. Also if you don't need `generator` and `probability` and your `value` not an object - you may path it directly to field.
 
