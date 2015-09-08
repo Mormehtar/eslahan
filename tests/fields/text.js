@@ -30,6 +30,18 @@ describe("Text field", function() {
     });
 
     it("Should return latin string of got length", function () {
-        check(field({from: 1, to: 7}), /^\w{1,7}$/);
+        check(field({wordFrom: 1, wordTo: 7}), /^\w{1,7}$/);
+    });
+
+    it("Should allow to generate several words", function () {
+        check(field({wordsFrom: 1, wordsTo: 3}), /^(\w{2,8} ){0,2}\w{2,8}$/);
+    });
+
+    it("Should allow to generate several words with predefined delimiter", function () {
+        check(field({wordsFrom: 1, wordsTo: 3, delimiter: ".,"}), /^(\w{2,8}[.,]){0,2}\w{2,8}$/);
+    });
+
+    it("Should allow to generate text with given symbols", function () {
+        check(field({symbols:field.symbols.DIGITS}), /^\d{2,8}$/);
     });
 });

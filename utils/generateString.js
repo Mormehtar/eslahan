@@ -10,5 +10,9 @@ exports.generator = function (l, symbols) {
 };
 
 exports.symbols = {
-    LATIN: "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+    LATIN: "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM",
+    SPACE: " ",
+    DELIMITERS: " ,./\\!?:;",
+    CYRILLIC: "йцукенгшщзхъфывапролджэячсмитьбюёЁЙЦУКЕНГШЩЗХЪЭЖДЛОРПАВЫФЯЧСМИТЬБЮ",
+    DIGITS: "0123456789"
 };

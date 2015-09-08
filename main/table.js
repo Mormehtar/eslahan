@@ -166,6 +166,13 @@ Table.prototype.getRowsByIndex = function (fieldName, fieldValue, options) {
     });
 };
 
+Table.prototype.getAllRows = function (options) {
+    var self = this;
+    return Object.keys(self.rows).map(function (rowId) {
+        return self.getRow(rowId, options);
+    });
+};
+
 Table.prototype.addPlugin = function (name, plugin) {
     if (this.plugins[name]) {
         throw new DBEnvError("Plugin " + name + "already existent");
