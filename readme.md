@@ -209,8 +209,8 @@ Example:
 `person1` will insert one `person` and 1-3 `things` with `owner=person1`.
 `person2` will insert one `person` and 1-3 `things` and all ow them will have `name="SomeThing"` and `owner=person2`.
 `person3` will insert one `person` and two `things` one of them will have `name="Picture"` and other will have `name="Paintings"` and both of them will have `owner=person3`.
-####text(options) -> fieldGenerator
-Defines string field. Returns string of latin characters of length in range from `from` to `to`. By default 2-8.
+####text(options) -> fieldGenerator (changed in 0.1.7)
+Defines text field. Returns text of `wordsFrom`-`wordsTo` words divided by `delimiter` of length `wordFrom`-`wordTo` and consists from symbols in `symbols`. Some predefined symbols strings may be found in `text.symbols`. By default generates text of one word in latin symbols of length 2-8. Default delimiter is space.
 ####uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
 ####json() -> fieldGenerator (new in `0.1.6`)
