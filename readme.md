@@ -155,13 +155,13 @@ Method finalizes table. Checks if it's consistent restrict constructing methods 
 Method mark field as index allowing usage of Table.getRowByIndex method with this field. Can be called before and after finalization.
 #### Table.dropIndex(fieldName) -> Table
 qgMethod drops index made by Table.addIndex method and frees memory got by destroyed index.
-#### Table.getRowsByIndex(fieldName, fieldValue, options) -> [rowData...]
+#### Table.getRowsByIndex(fieldName, fieldValue, options) -> \[rowData...\]
 Returns array of rows with field `fieldName` equal to `fieldValue`. If no rows found returns empty array. If `options` are used in rows extracting identically to Table.getRow options. Only works with fields declared as indexes by Table.addIndex method.
 #### Table.addPlugin(name, plugin) -> Table
 Method adds `plugin` to table and gives given `name` to it. Plugins are called after every insert and get table as this, keyValue of just inserted row and parameters passed to insert method in field equal to `name`.
 #### Table.deletePlugin(name) -> Table
 Method deletes plugin with given `name`.
-#### Table.getAllRows(options) -> [rowData...] (new in 0.1.7)
+#### Table.getAllRows(options) -> \[rowData...\] (new in 0.1.7)
 Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically to `Table.getRow`.
 
 ###Fields
