@@ -146,7 +146,7 @@ So we'll get `daughter1_1` - all fields of `daughter1` row, and `mother` will be
 `daughter1_2` will be an object with fields `name` and `mother` where `mother` would be just an `id` of dependent table.
 `daughter2_1` will be an object with all fields of `daughter2` row and `mother` is object with copy of all fields of respective `mother` row.
 `daughter2_2` will be equal to ```{name: "Ekaterina", mother: {name: "Anastasia"}}``` due to our demand to inserted rows.
-It`s important to remember, that getRow method works with cache and returns initial data which was inserted during preparation for testing scenario. And it can be used as example control data, not affected by test scenario.
+It's important to remember, that getRow method works with cache and returns initial data which was inserted during preparation for testing scenario. And it can be used as example control data, not affected by test scenario.
 #### Table.hasRow(key) -> boolean
 Method returns if there is a row with given key.
 #### Table.finalize()
@@ -161,6 +161,8 @@ Returns array of rows with field `fieldName` equal to `fieldValue`. If no rows f
 Method adds `plugin` to table and gives given `name` to it. Plugins are called after every insert and get table as this, keyValue of just inserted row and parameters passed to insert method in field equal to `name`.
 #### Table.deletePlugin(name) -> Table
 Method deletes plugin with given `name`.
+#### Table.getAllRows(options) -> [rowData...] (new in 0.1.7)
+Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically to `Table.getRow`.
 
 ###Fields
 Fields is a collection of field generators for Eslahan. You can use your oun fieldGenerators but Eslahan gives you some predefined generators. They are available as `eslahan.fields`.

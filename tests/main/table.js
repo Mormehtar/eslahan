@@ -556,4 +556,63 @@ describe("Table object", function () {
             assert.sameMembers(table.pluginsNames, []);
         });
     });
+
+    describe("getAllRows method", function () {
+
+        it("Should return all rows of table", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true).finalize();
+
+            var id1 = table.insert();
+            var id2 = table.insert();
+
+            var etalon = [table.getRow(id1), table.getRow(id2)];
+            assert.sameDeepMembers(table.getAllRows(), etalon);
+        });
+
+        it("Should return all rows with given options", function () {
+            var mother = new Table("Mother", new EtalonDao());
+            mother
+                .addField("id", fields.uuid(), true)
+                .addField("data", fields.uuid())
+                .finalize();
+            var daughter = new Table("Daughter", new EtalonDao());
+            daughter
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(mother))
+                .finalize();
+            var grandDaughter = new Table("Granddaughter", new EtalonDao());
+            grandDaughter
+                .addField("id", fields.uuid(), true)
+                .addField("daughter", fields.dependency(daughter))
+                .finalize();
+
+            var options = {
+                fields:[
+                    {
+                        name:"daughter",
+                        fields:[
+                            {
+                                name: "mother",
+                                fields:["data"]
+                            }
+                        ],
+                        populated: true
+                    }
+                ],
+                populated: true
+            };
+
+            var key1 = grandDaughter.insert();
+            var key2 = grandDaughter.insert();
+
+            var etalon = [
+                grandDaughter.getRow(key1, options),
+                grandDaughter.getRow(key2, options)
+            ];
+            assert.sameDeepMembers(grandDaughter.getAllRows(options), etalon);
+        });
+
+
+    });
 });
