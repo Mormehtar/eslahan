@@ -161,7 +161,7 @@ Returns array of rows with field `fieldName` equal to `fieldValue`. If no rows f
 Method adds `plugin` to table and gives given `name` to it. Plugins are called after every insert and get table as this, keyValue of just inserted row and parameters passed to insert method in field equal to `name`.
 #### Table.deletePlugin(name) -> Table
 Method deletes plugin with given `name`.
-#### Table.getAllRows(options) -> \[rowData...\] (new in 0.1.7)
+#### Table.getAllRows(options) -> \[rowData...\] (new in `0.1.7`)
 Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically to `Table.getRow`.
 
 ###Fields
@@ -211,7 +211,7 @@ Example:
 `person1` will insert one `person` and 1-3 `things` with `owner=person1`.
 `person2` will insert one `person` and 1-3 `things` and all ow them will have `name="SomeThing"` and `owner=person2`.
 `person3` will insert one `person` and two `things` one of them will have `name="Picture"` and other will have `name="Paintings"` and both of them will have `owner=person3`.
-####text(options) -> fieldGenerator (changed in 0.1.7)
+####text(options) -> fieldGenerator (changed in `0.1.7`)
 Defines text field. Returns text of `wordsFrom`-`wordsTo` words divided by `delimiter` of length `wordFrom`-`wordTo` and consists from symbols in `symbols`. Some predefined symbols strings may be found in `text.symbols`. By default generates text of one word in latin symbols of length 2-8. Default delimiter is space.
 ####uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
