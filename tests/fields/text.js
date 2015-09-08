@@ -3,7 +3,7 @@ var fields = require("../..").fields;
 var field = fields.text;
 var check = require("../testHelpers").check;
 
-describe.only("Text field", function() {
+describe("Text field", function() {
 
     it("Should exist", function () {
         assert.isFunction(field);
