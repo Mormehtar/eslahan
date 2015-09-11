@@ -133,16 +133,4 @@ describe("Dependency field", function() {
         assert.lengthOf(Object.keys(table.rows), 1);
     });
 
-    it("Should throw error if depends on existent and has defined parameters but not id", function () {
-        var table = new Table("Name", new EtalonDao());
-        table
-            .addField("id", fields.uuid(), true)
-            .addField("data", fields.uuid())
-            .finalize();
-        var f = field(table, {dependsOnExistent: true});
-
-        assert.throw(function () {
-            f({"data": "someData"});
-        }, DBEnvError);
-    });
 });

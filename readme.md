@@ -177,7 +177,7 @@ Defines decimal field. It returns string with number from `from` to `to` with `f
 ####dependency(table) -> fieldGenerator
 Defines field that depends on other table. If table has dependency to other table, every insert to this table will cause insertion (if needed and possible) to dependant table. Generator takes table object, to make dependency. You can look Table.addField example to see usage of dependency field.
 (new in `0.1.8`)
-Also `dependsOnExistent` parameter may be given. If it is `true`, generator will return only existent `id`s or `null`. You can't pass parameters without `id` to generator if `dependsOnExistent` is true.  
+Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.   
 ####email(options) -> fieldGenerator
 Defines field with random email. Gets `addressFrom` (default 3), `addressTo` (default 8), `serverFrom` (default 3), `serverTo` (default 8), `domainFrom` (default 1), `domainTo` (default 3). Field generates email with lengths in ranges (`addressFrom` - `addressTo`)@(`serverFrom` - `serverTo`).(`domainFrom` - `domainTo`).
 ####float(options) -> fieldGenerator
@@ -213,6 +213,8 @@ Example:
 `person1` will insert one `person` and 1-3 `things` with `owner=person1`.
 `person2` will insert one `person` and 1-3 `things` and all ow them will have `name="SomeThing"` and `owner=person2`.
 `person3` will insert one `person` and two `things` one of them will have `name="Picture"` and other will have `name="Paintings"` and both of them will have `owner=person3`.
+(new in `0.1.8`)
+Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.
 ####text(options) -> fieldGenerator (changed in `0.1.7`)
 Defines text field. Returns text of `wordsFrom`-`wordsTo` words divided by `delimiter` of length `wordFrom`-`wordTo` and consists from symbols in `symbols`. Some predefined symbols strings may be found in `text.symbols`. By default generates text of one word in latin symbols of length 2-8. Default delimiter is space.
 ####uuid() -> fieldGenerator

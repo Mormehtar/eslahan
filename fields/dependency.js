@@ -46,9 +46,6 @@ module.exports = function (table, options) {
                 }
                 return key;
             }
-            if (options.dependsOnExistent) {
-                throw new DBEnvError("Dependency on existent and specifies data, but not id");
-            }
             return table.insert(value);
         };
     };

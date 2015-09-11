@@ -1,5 +1,6 @@
 var Table = require("../main/table");
 var DBEnvError = require("../main/error");
+var chooseFromRange = require("../utils/chooseFromRange");
 
 var baseGenerator = require("../utils/baseGenerator");
 
@@ -14,13 +15,19 @@ module.exports = function (table, fieldName, options) {
 
     var defaults = {
         from: 2,
-        to: 8
+        to: 8,
+        dependsOnExistent: false
     };
 
     var generate = function (options) {
         return function (value) {
             if (value === null) {
                 return null;
+            }
+            if (arguments.length === 0 && options.dependsOnExistent) {
+                var candidates = table.getAllRows({fields:[fieldName]});
+                var keyLength = candidates.length;
+                return keyLength ? candidates[chooseFromRange(0, keyLength - 1)][fieldName] : null;
             }
             var number = Math.floor(Math.random() * (options.to - options.from + 1)) + options.from;
             var data, first;
