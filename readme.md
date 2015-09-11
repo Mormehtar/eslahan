@@ -176,6 +176,8 @@ Defines datetime field. It returns now by default. If only `from` passed, field 
 Defines decimal field. It returns string with number from `from` to `to` with `fractionalDigits` digits after dot. By default it returns number in trange 0-100 with two digits after dot.
 ####dependency(table) -> fieldGenerator
 Defines field that depends on other table. If table has dependency to other table, every insert to this table will cause insertion (if needed and possible) to dependant table. Generator takes table object, to make dependency. You can look Table.addField example to see usage of dependency field.
+(new in `0.1.8`)
+Also `dependsOnExistent` parameter may be given. If it is `true`, generator will return only existent `id`s or `null`. You can't pass parameters without `id` to generator if `dependsOnExistent` is true.  
 ####email(options) -> fieldGenerator
 Defines field with random email. Gets `addressFrom` (default 3), `addressTo` (default 8), `serverFrom` (default 3), `serverTo` (default 8), `domainFrom` (default 1), `domainTo` (default 3). Field generates email with lengths in ranges (`addressFrom` - `addressTo`)@(`serverFrom` - `serverTo`).(`domainFrom` - `domainTo`).
 ####float(options) -> fieldGenerator

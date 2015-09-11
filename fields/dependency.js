@@ -1,18 +1,30 @@
 var Table = require("../main/table");
 var DBEnvError = require("../main/error");
+var chooseFromRange = require("../utils/chooseFromRange");
 
 var baseGenerator = require("../utils/baseGenerator");
 
-module.exports = function (table) {
+var defaults = {
+    dependsOnExistent: false
+};
+
+module.exports = function (table, options) {
     if (!table || !(table instanceof Table)) {
         throw new DBEnvError("Expect Table instance as parameter");
     }
 
-    var specificGenerator = function () {
-        return table.insert.bind(table);
+    var specificGenerator = function (options) {
+        return function () {
+            if (options.dependsOnExistent) {
+                var keys = table.getAllRows({fields:["id"]});
+                var keyLength = keys.length;
+                return keyLength? keys[chooseFromRange(0, keyLength - 1)].id : null;
+            }
+            return table.insert();
+        }
     };
 
-    var converterGenerator = function () {
+    var converterGenerator = function (options) {
         return function (value) {
             if (value == null) {
                 return null;
@@ -34,11 +46,16 @@ module.exports = function (table) {
                 }
                 return key;
             }
+            if (options.dependsOnExistent) {
+                throw new DBEnvError("Dependency on existent and specifies data, but not id");
+            }
             return table.insert(value);
         };
     };
 
     var result = baseGenerator({
+        options: options,
+        defaults: defaults,
         specificGenerator: specificGenerator,
         converterGenerator:converterGenerator
     });

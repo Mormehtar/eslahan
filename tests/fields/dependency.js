@@ -92,4 +92,57 @@ describe("Dependency field", function() {
         var row = mother.getRow(daughter.getRow(key, ["mother"]).mother, ["data"]);
         assert.equal(row.data, "SomeData");
     });
+
+    it("Should create row with given id if it doesn't exists", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var f = field(table);
+        var key = f({id: "abra"});
+
+        assert.equal(key, "abra");
+        assert.deepEqual(table.getRow("abra", {fields:[]}), {});
+    });
+
+    it("Should return null if depend on existent given and there is no rows", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var f = field(table, {dependsOnExistent: true});
+        var key = f();
+
+        assert.isNull(key);
+        assert.lengthOf(Object.keys(table.rows), 0);
+    });
+
+    it("Should return existent key if depend on existent given", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var key1 = table.insert();
+        var f = field(table, {dependsOnExistent: true});
+        var key = f();
+
+        assert.equal(key, key1);
+        assert.lengthOf(Object.keys(table.rows), 1);
+    });
+
+    it("Should throw error if depends on existent and has defined parameters but not id", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var f = field(table, {dependsOnExistent: true});
+
+        assert.throw(function () {
+            f({"data": "someData"});
+        }, DBEnvError);
+    });
 });
