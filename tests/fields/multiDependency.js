@@ -196,4 +196,19 @@ describe("Multi dependency field", function() {
         assert.equal(key, fieldData);
         assert.lengthOf(Object.keys(table.rows), 1);
     });
+
+    it("Should insert dependent row if id value passed", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .addField("other", fields.uuid())
+            .finalize();
+        var f = field(table, "data", {dependsOnExistent: true, from:2, to:2});
+        var key = f({other: "abra"});
+
+        assert.lengthOf(Object.keys(table.rows), 2);
+        assert.sameDeepMembers(table.getRowsByIndex("data", key, {fields: ["other"]}), [{other: "abra"}, {other: "abra"}]);
+    });
+
 });
