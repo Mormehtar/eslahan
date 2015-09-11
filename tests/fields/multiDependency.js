@@ -171,4 +171,29 @@ describe("Multi dependency field", function() {
         var result = table.getRowsByIndex("data", value);
         assert.sameDeepMembers(result, [{id: 1, data:value}, {id:2, data:value}]);
     });
+
+    it("Should return null if depend on existent given and there is no rows", function () {
+        var table = testTable();
+        var f = field(table, "data", {dependsOnExistent: true});
+        var key = f();
+
+        assert.isNull(key);
+        assert.lengthOf(Object.keys(table.rows), 0);
+    });
+
+    it("Should return existent key if depend on existent given", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .addField("other", fields.uuid())
+            .finalize();
+        var key1 = table.insert();
+        var fieldData = table.getRow(key1, {fields:["data"]}).data;
+        var f = field(table, "data", {dependsOnExistent: true});
+        var key = f();
+
+        assert.equal(key, fieldData);
+        assert.lengthOf(Object.keys(table.rows), 1);
+    });
 });
