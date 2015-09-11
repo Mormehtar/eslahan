@@ -227,8 +227,7 @@ Defines field that depends on other table. If table has dependency to other tabl
 cause insertion (if needed and possible) to dependant table. Generator takes table object, to make dependency. You can
 look Table.addField example to see usage of dependency field.
 
-(new in `0.1.8`)
-
+*(new in `0.1.8`)*
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.   
 ####email(options) -> fieldGenerator
@@ -277,8 +276,7 @@ Example:
 `person3` will insert one `person` and two `things` one of them will have `name="Picture"` and other will have
 `name="Paintings"` and both of them will have `owner=person3`.
 
-(new in `0.1.8`)
-
+*(new in `0.1.8`)*
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.
 ####text(options) -> fieldGenerator (changed in `0.1.7`)
