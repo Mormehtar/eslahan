@@ -40,10 +40,11 @@ module.exports = function (table, fieldName, options) {
                 --number;
             } else {
                 if (typeof value == "object" && !(value instanceof Date)) {
-                    if (value.hasOwnProperty(fieldName)) {
+                    if (fieldName in value) {
                         data = value;
                     } else {
                         first = table.insert(value);
+                        --number;
                         data = value;
                         data[fieldName] = table.getRow(first, {fields: [fieldName]})[fieldName];
                     }

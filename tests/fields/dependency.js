@@ -133,4 +133,17 @@ describe("Dependency field", function() {
         assert.lengthOf(Object.keys(table.rows), 1);
     });
 
+    it("Should insert dependent row if id value passed", function () {
+        var table = new Table("Name", new EtalonDao());
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var f = field(table, {dependsOnExistent: true});
+        var key = f({data: "abra"});
+
+        assert.lengthOf(Object.keys(table.rows), 1);
+        assert.equal(table.getRow(key, {fields: ["data"]}).data, "abra");
+    });
+
 });
