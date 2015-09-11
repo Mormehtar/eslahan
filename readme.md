@@ -1,7 +1,11 @@
 # Eslahan is a DB environment constructor for performing tests.
 ## Philosophy
 
-Eslahan's main task is to simplify the process of DB preparation for testing scenarios. It allows to avoid large generalized DB conditions, which may make tests implicitly dependant. With the help of Eslahan you can describe DB structure once and insert needed data only, ignoring data not important at the given testing scenario. Eslahan will fill in all other fields according to rules specified by user.
+Eslahan's main task is to simplify the process of DB preparation for testing scenarios.
+It allows to avoid large generalized DB conditions, which may make tests implicitly dependant.
+With the help of Eslahan you can describe DB structure once and insert needed data only,
+ignoring data not important at the given testing scenario.
+Eslahan will fill in all other fields according to rules specified by user.
 
 ## Installation
 
