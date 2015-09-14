@@ -1,20 +1,26 @@
 {
-  "name": "eslahan",
-  "version": "0.1.9",
-  "description": "Database environment constructor for tests",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha --recursive ./tests"
-  },
-  "author": "Dark Rider <mormehtar@gmail.com>",
-  "license": "ISC",
-  "devDependencies": {
-    "chai": "^3.2.0",
-    "mocha": "^2.2.5",
-    "sinon": "^1.15.4"
-  },
-  "dependencies": {
-    "moment": "^2.10.6",
-    "uuid": "^2.0.1"
-  }
+    "name": "eslahan",
+    "version": "0.1.9",
+    "description": "Database environment constructor for tests",
+    "main": "index.js",
+    "scripts": {
+        "test": "mocha --recursive ./tests"
+    },
+    "author": "Dark Rider <mormehtar@gmail.com>",
+    "license": "OSL-3.0",
+    "homepage": "https://github.com/Mormehtar/eslahan",
+    "bugs": "https://github.com/Mormehtar/eslahan/issues",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Mormehtar/eslahan.git"
+    },
+    "devDependencies": {
+        "chai": "^3.2.0",
+        "mocha": "^2.2.5",
+        "sinon": "^1.15.4"
+    },
+    "dependencies": {
+        "moment": "^2.10.6",
+        "uuid": "^2.0.1"
+    }
 }
