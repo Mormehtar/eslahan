@@ -6,6 +6,7 @@
     "scripts": {
         "test": "mocha --recursive ./tests"
     },
+    "keywords": ["test", "db", "zatanna"],
     "author": "Dark Rider <mormehtar@gmail.com>",
     "license": "OSL-3.0",
     "homepage": "https://github.com/Mormehtar/eslahan",
