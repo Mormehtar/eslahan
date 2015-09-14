@@ -185,4 +185,15 @@ describe("DBEnv object", function () {
             assert.ok(env.dao["father"].delete.calledBefore(env.dao["grandFather"].delete), "GrandFather should not be deleted before father");
         });
     });
+
+    it("Should allow self dependent table", function () {
+        var env = new DBEnv({
+            table: new TableDao()
+        });
+        var table = env.addTable("table");
+        table
+            .addField("id", fields.uuid(), true)
+            .addField("parent", fields.dependency(table, {dependsOnExistent: true}));
+        env.finalize();
+    });
 });

@@ -71,10 +71,9 @@ DBEnv.prototype.finalize = function () {
             table.table.finalize();
         }
         var fields = table.table.fields;
-        table.dependencies = 0;
         table.depends = Object.keys(fields).map(function (fieldName) {
             var dependency = fields[fieldName].dependency;
-            return dependency && dependency.name;
+            return dependency && dependency.name && dependency != table;
         }).filter(function (tableName) {
             if (tableName) {
                 ++table.dependencies;
