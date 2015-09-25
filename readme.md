@@ -206,7 +206,7 @@ Method deletes plugin with given `name`.
 Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically
 to `Table.getRow`.
 
-###Fields
+### Fields
 Fields is a collection of field generators for Eslahan. You can use your oun fieldGenerators but Eslahan gives you some
 predefined generators. They are available as `eslahan.fields`.
 
@@ -215,14 +215,14 @@ method it can get options like:
 
     table.addField("SomeInt", eslahan.fields.int({from: 5, to: 10}));
 
-####datetime(options) -> fieldGenerator
+#### datetime(options) -> fieldGenerator
 Defines datetime field. It returns now by default. If only `from` passed, field will be a random datetime from `from` to
 now. If only `to` passed, field will be random datetime from now to `to`. If `from` and `to` passed, field will be
 random datetime from `from` to `to`.
-####decimal(options) -> fieldGenerator
+#### decimal(options) -> fieldGenerator
 Defines decimal field. It returns string with number from `from` to `to` with `fractionalDigits` digits after dot. By
 default it returns number in trange 0-100 with two digits after dot.
-####dependency(table) -> fieldGenerator
+#### dependency(table) -> fieldGenerator
 Defines field that depends on other table. If table has dependency to other table, every insert to this table will
 cause insertion (if needed and possible) to dependant table. Generator takes table object, to make dependency. You can
 look Table.addField example to see usage of dependency field.
@@ -230,17 +230,17 @@ look Table.addField example to see usage of dependency field.
 **(new in `0.1.8`)**
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.   
-####email(options) -> fieldGenerator
+#### email(options) -> fieldGenerator
 Defines field with random email. Gets `addressFrom` (default 3), `addressTo` (default 8), `serverFrom` (default 3),
 `serverTo` (default 8), `domainFrom` (default 1), `domainTo` (default 3). Field generates email with lengths in ranges
 (`addressFrom` - `addressTo`)@(`serverFrom` - `serverTo`).(`domainFrom` - `domainTo`).
-####float(options) -> fieldGenerator
+#### float(options) -> fieldGenerator
 Defines random float point field in range from `from` to `to`. By default 0-100.
-####increment(options) -> fieldGenerator
+#### increment(options) -> fieldGenerator
 Defines incrementing field generator returning row of numbers from `from`. From 1 by default. (1, 2, 3)
-####int(options) -> fieldGenerator
+#### int(options) -> fieldGenerator
 Defines integer field. Returns integer in range from `from` to `to`. By default 0-100.
-####multiDependency(table, fieldName, options) -> fieldGenerator
+#### multiDependency(table, fieldName, options) -> fieldGenerator
 Defines field that depends on many rows of other table. Generates (if needed and possible) from `from` to `to` dependent
 rows (2-8 by default). Can pass common elements if value for field is object, or allows to define every daughter element
 if value for field is an array.
@@ -280,13 +280,13 @@ Example:
 **(new in `0.1.8`)**
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.
-####text(options) -> fieldGenerator (changed in `0.1.7`)
+#### text(options) -> fieldGenerator (changed in `0.1.7`)
 Defines text field. Returns text of `wordsFrom`-`wordsTo` words divided by `delimiter` of length `wordFrom`-`wordTo` and
 consists from symbols in `symbols`. Some predefined symbols strings may be found in `text.symbols`. By default generates
 text of one word in latin symbols of length 2-8. Default delimiter is space.
-####uuid() -> fieldGenerator
+#### uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
-####json() -> fieldGenerator (new in `0.1.6`)
+#### json() -> fieldGenerator (new in `0.1.6`)
 Defines JSON field. Returns json string made using `template`. Template is an object, defining objects that may be in
 your JSON by default. Default `template` defines JSON of empty string.
 
@@ -329,10 +329,10 @@ Will generate JSON of objects like
 `fieldThree` will appear only in half objects, `fieldTwo` will be some real UUID, `fieldFour` always equal to `5`
 because UUID generator passes it. 
 
-###Plugins
+### Plugins
 Is a collection of plugins for Tables. Plugins allow to make some action on insertion to Table. They are available
 by `eslahan.plugins`.
-####oneToManyDependency(baseTable, table, fieldName, options) -> pluginFunction
+#### oneToManyDependency(baseTable, table, fieldName, options) -> pluginFunction
 Describes reversed one to many dependency, when for example one table has dependency on the other (and allows it to be
 many to one dependency) but it is easier to insert data int dependent table. For example:
 
