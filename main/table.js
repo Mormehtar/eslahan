@@ -203,3 +203,13 @@ Table.prototype.saveFixture = function () {
         this.fixture = result || [];
     });
 };
+
+Table.prototype.setFixture = function () {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t set fixture to not finalized table");
+    }
+
+    for (var i=this.fixture.length; i;) {
+        this.insert(this.fixture[--i]);
+    }
+};

@@ -647,4 +647,30 @@ describe("Table object", function () {
             }).catch(done);
         });
     });
+
+    describe("setFixture method", function () {
+
+        it("Should fail on not finalized table", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true);
+
+            assert.throw(function () {
+                table.setFixture();
+            }, DBEnvError);
+        });
+
+        it("Should set fixtures to object", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true).finalize();
+
+            var spy = sinon.spy(table, "insert");
+            table.fixture = [{id: uuid()}, {id: uuid()}];
+
+            table.setFixture();
+
+            assert.isTrue(spy.calledTwice);
+            assert.deepEqual(spy.firstCall.args[0], table.fixture[1]);
+            assert.deepEqual(spy.secondCall.args[0], table.fixture[0]);
+        });
+    });
 });

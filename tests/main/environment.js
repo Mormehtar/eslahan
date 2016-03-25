@@ -1,6 +1,7 @@
 var uuid = require("uuid").v4;
 var Promise = require("bluebird");
 var assert = require("chai").assert;
+var sinon = require("sinon");
 
 var TableDao = require("./../testHelpers").tableDao;
 var Table = require("../../main/table");
@@ -258,5 +259,53 @@ describe("DBEnv object", function () {
             }).catch(done);
         });
 
+    });
+
+    describe("setFixture method", function () {
+
+        it("Should throw exception if environment not finalized", function () {
+            var env = new DBEnv(new TableDao(), function (tableName, dao) {
+                return dao;
+            });
+            assert.throw(function () {
+                env.setFixture();
+            }, DBEnvError);
+        });
+
+        it("Should set fixtures in right order", function () {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var etalon1 = [{id: uuid()}, {id: uuid()}];
+            var etalon2 = [{id: uuid(), fk: etalon1[0].id}, {id:uuid(), fk: etalon1[1].id}];
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var spyCleanup = sinon.spy(env, "cleanup");
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+            table1.fixture = etalon1;
+            var spy1 = sinon.spy(table1, "setFixture");
+
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+            table2.fixture = etalon2;
+            var spy2 = sinon.spy(table2, "setFixture");
+
+            env.finalize();
+
+            env.setFixture();
+
+            assert.isTrue(spyCleanup.calledBefore(spy1), "CleanUp must be made before first table fixtures!");
+            assert.isTrue(spyCleanup.calledBefore(spy2), "CleanUp must be made before second table fixtures!");
+            assert.isTrue(spy1.calledBefore(spy2), "first table fixtures must by set before second table");
+        });
     });
 });
