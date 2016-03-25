@@ -1,3 +1,5 @@
+var uuid = require("uuid").v4;
+var Promise = require("bluebird");
 var assert = require("chai").assert;
 var sinon = require("sinon");
 var EtalonDao = require("./../testHelpers").tableDao;
@@ -171,7 +173,7 @@ describe("Table object", function () {
             table.insert();
             table.cleanup();
 
-            assert.ok(table.dao.delete.calledOnce);
+            assert.ok(table.dao.truncate.calledOnce);
         });
 
         it("Should cleanup cache", function () {
@@ -614,5 +616,61 @@ describe("Table object", function () {
         });
 
 
+    });
+
+    describe("saveFixture method", function () {
+        it("Should fail on not finalized table", function (done) {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true);
+
+            table.saveFixture().then(function () {
+                done("Hadn`t throw exception!");
+            }).catch(function (error) {
+                assert.instanceOf(error, DBEnvError);
+                done();
+            }).catch(done);
+        });
+
+        it("Should save fixtures in object from DB", function (done) {
+            var dao = new EtalonDao();
+            var etalonResult = [{id: uuid()}, {id: uuid()}];
+
+            dao.select.returns(Promise.resolve(etalonResult));
+
+            var table = new Table("Name", dao);
+
+            table.addField("id", fields.uuid(), true).finalize();
+
+            table.saveFixture().then(function () {
+                assert.deepEqual(table.fixture, etalonResult);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("setFixture method", function () {
+
+        it("Should fail on not finalized table", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true);
+
+            assert.throw(function () {
+                table.setFixture();
+            }, DBEnvError);
+        });
+
+        it("Should set fixtures to object", function () {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true).finalize();
+
+            var spy = sinon.spy(table, "insert");
+            table.fixture = [{id: uuid()}, {id: uuid()}];
+
+            table.setFixture();
+
+            assert.isTrue(spy.calledTwice);
+            assert.deepEqual(spy.firstCall.args[0], table.fixture[1]);
+            assert.deepEqual(spy.secondCall.args[0], table.fixture[0]);
+        });
     });
 });
