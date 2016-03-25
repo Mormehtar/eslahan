@@ -125,10 +125,12 @@ DBEnv.prototype.cleanup = function () {
 };
 
 DBEnv.prototype.saveFixture = function() {
-    if (!this.finalized) {
-        throw new DBEnvError("Can`t set fixture to not finalized environment");
-    }
-    return Promise.each(this.tableOrder, function (tableIndex){
-        this.tables[this.tableOrder[tableIndex]].table.saveFixture();
-    }.bind(this));
+    return Promise.resolve().bind(this).then(function () {
+        if (!this.finalized) {
+            throw new DBEnvError("Can`t set fixture to not finalized environment");
+        }
+        return this.tableOrder
+    }).mapSeries(function (tableName){
+        return this.tables[tableName].table.saveFixture();
+    });
 };

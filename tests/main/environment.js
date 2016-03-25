@@ -1,3 +1,5 @@
+var uuid = require("uuid").v4;
+var Promise = require("bluebird");
 var assert = require("chai").assert;
 
 var TableDao = require("./../testHelpers").tableDao;
@@ -195,5 +197,66 @@ describe("DBEnv object", function () {
             .addField("id", fields.uuid(), true)
             .addField("parent", fields.dependency(table, {dependsOnExistent: true}));
         env.finalize();
+    });
+
+    describe("saveFixture method", function () {
+
+        it("Should fail on not finalized", function (done) {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+
+            env.saveFixture().then(function () {
+                done("Hadn`t throw exception!");
+            }).catch(function (error) {
+                assert.instanceOf(error, DBEnvError);
+                done();
+            }).catch(done);
+        });
+
+        it("Should allow to save fixtures for all tables", function (done) {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var etalon1 = [{id: uuid()}, {id: uuid()}];
+            var etalon2 = [{id: uuid(), fk: etalon1[0].id}, {id:uuid(), fk: etalon1[1].id}];
+
+            dao1.select.returns(Promise.resolve(etalon1));
+            dao2.select.returns(Promise.resolve(etalon2));
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+
+            env.finalize();
+
+            env.saveFixture().then(function () {
+                assert.deepEqual(table1.fixture, etalon1);
+                assert.deepEqual(table2.fixture, etalon2);
+                done();
+            }).catch(done);
+        });
+
     });
 });

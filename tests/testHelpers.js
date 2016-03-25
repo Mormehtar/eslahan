@@ -13,4 +13,5 @@ exports.tableDao = function () {
     this.insert = sinon.stub();
     this.delete = sinon.stub();
     this.truncate = sinon.stub();
+    this.select = sinon.stub();
 };

@@ -1,3 +1,5 @@
+var uuid = require("uuid").v4;
+var Promise = require("bluebird");
 var assert = require("chai").assert;
 var sinon = require("sinon");
 var EtalonDao = require("./../testHelpers").tableDao;
@@ -614,5 +616,35 @@ describe("Table object", function () {
         });
 
 
+    });
+
+    describe("saveFixture method", function () {
+        it("Should fail on not finalized table", function (done) {
+            var table = new Table("Name", new EtalonDao());
+            table.addField("id", fields.uuid(), true);
+
+            table.saveFixture().then(function () {
+                done("Hadn`t throw exception!");
+            }).catch(function (error) {
+                assert.instanceOf(error, DBEnvError);
+                done();
+            }).catch(done);
+        });
+
+        it("Should save fixtures in object from DB", function (done) {
+            var dao = new EtalonDao();
+            var etalonResult = [{id: uuid()}, {id: uuid()}];
+
+            dao.select.returns(Promise.resolve(etalonResult));
+
+            var table = new Table("Name", dao);
+
+            table.addField("id", fields.uuid(), true).finalize();
+
+            table.saveFixture().then(function () {
+                assert.deepEqual(table.fixture, etalonResult);
+                done();
+            }).catch(done);
+        });
     });
 });

@@ -194,21 +194,12 @@ Table.prototype.deletePlugin = function (name) {
 };
 
 Table.prototype.saveFixture = function () {
-    if (!this.finalized) {
-        throw new DBEnvError("Can`t get fixture from not finalized table");
-    }
-
-    return this.dao.select().then(function (result) {
-        this.fixture = result || [];
-    }.bind(this));
-};
-
-Table.prototype.saveFixture = function () {
-    if (!this.finalized) {
-        throw new DBEnvError("Can`t get fixture from not finalized table");
-    }
-
-    return Promise.resolve(this.dao.select()).bind(this).then(function (result) {
+    return Promise.resolve().bind(this).then(function () {
+        if (!this.finalized) {
+            throw new DBEnvError("Can`t get fixture from not finalized table");
+        }
+        return this.dao.select();
+    }).then(function (result) {
         this.fixture = result || [];
     });
 };
