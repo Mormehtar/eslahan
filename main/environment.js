@@ -1,3 +1,4 @@
+var Promise = require("bluebird");
 var Table = require("./table");
 var DBEnvError = require("./error");
 
@@ -120,5 +121,26 @@ DBEnv.prototype.cleanup = function () {
     }
     for (var i = this.tableOrder.length; i;) {
         this.tables[this.tableOrder[--i]].table.cleanup();
+    }
+};
+
+DBEnv.prototype.saveFixture = function() {
+    return Promise.resolve().bind(this).then(function () {
+        if (!this.finalized) {
+            throw new DBEnvError("Can`t save fixture from not finalized environment");
+        }
+        return this.tableOrder
+    }).mapSeries(function (tableName){
+        return this.tables[tableName].table.saveFixture();
+    });
+};
+
+DBEnv.prototype.setFixture = function () {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t set fixture to not finalized environment");
+    }
+    this.cleanup();
+    for (var i = 0, max = this.tableOrder.length; i < max;) {
+        this.tables[this.tableOrder[i++]].table.setFixture();
     }
 };

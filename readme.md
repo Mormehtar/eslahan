@@ -75,10 +75,12 @@ If we wish, we can generate their cousin who will share a grandfather with them,
 
 ## DAO and DB
 Eslahan was created on the assumption of using `Zatanna` or any other DAO offering `insert` and `delete` methods.
+From **version 2.0.0** Eslahan expects DAO to support `insert`, `delete`, `truncate` and `select` methods.
+Where `select` uses promises and returns whole table as array of objects if run without parameters.
 
 There are two key requirements one should mind when using Eslahan. First is, DAO methods should be synchronous and
-user has to execute async part himself right when it's needed, while the second point is that DAO must not depend on DB
-scripts (for example, on sequence generators).
+user has to execute async part himself right when it's needed, except for `select` method used in `saveFixture` functionality **(from version 2.0.0)**,
+while the second point is that DAO must not depend on DB scripts (for example, on sequence generators).
 
 The first requirement is fulfilled easily by wrapping DAO methods with accumulators, while the second one can be walked
 around by generating sequences through JavaScript (with the help of matching field generators within Eslahan).
@@ -99,7 +101,7 @@ Accessible via
 
 Main Eslahan object. Allows to describe system as whole and to manipulate with it. To construct it you must provide DAO
 object and (optionally) tableGetter - function choosing table DAO from given DAO. By default Eslahan chooses
-DAO[tableName] as table DAO. Example can be found below.
+`DAO[tableName]` as table DAO. Example can be found below.
 
     var env = new DBEnv(DAO, tableChooser);
 
@@ -113,6 +115,14 @@ Method finalizes all created tables, makes all needed preparations inside Enviro
 tables makes possible to cleanUp tables.
 #### DBEnv.cleanUp()
 Method says to DAO (synchronously) that all tables can bee cleaned up and defines right order for table cleaning.
+#### DBEnv.saveFixture() -> Promise
+**(new in version 2.0.0)**
+Method says to Eslahan to save DB state in memory for later DB restoring. Method returns `Promise` and is **asynchronous**.
+#### DBEnv.setFixture()
+**(new in version 2.0.0)**
+Method says to Eslahan to restore DB state to that which was when `DBEnv.saveFixture()` has been called. Method is synchronous.
+It is strongly recommended to envelope execution plan with transaction. (`dao.execute(true)` in `Zatanna` for example).
+
 
 ### Table object
 Accessible via `addTable` and `getTable` methods of `DBEnv` object.
@@ -202,9 +212,18 @@ Method adds `plugin` to table and gives given `name` to it. Plugins are called a
 keyValue of just inserted row and parameters passed to insert method in field equal to `name`.
 #### Table.deletePlugin(name) -> Table
 Method deletes plugin with given `name`.
-#### Table.getAllRows(options) -> \[rowData...\] (new in `0.1.7`)
+#### Table.getAllRows(options) -> \[rowData...\]
+**(new in 0.1.7)**
 Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically
 to `Table.getRow`.
+#### Table.saveFixture() -> Promise
+**(new in version 2.0.0)**
+Method says to Eslahan to save Table state in memory for later DB restoring. Method returns `Promise` and is **asynchronous**.
+#### Table.setFixture()
+**(new in version 2.0.0)**
+Method says to Eslahan to restore Table state to that which was when `Table.saveFixture()` has been called. Method is synchronous.
+It is strongly recommended to envelope execution plan with transaction. (`dao.execute(true)` in `Zatanna` for example).
+
 
 ### Fields
 Fields is a collection of field generators for Eslahan. You can use your oun fieldGenerators but Eslahan gives you some
@@ -227,7 +246,7 @@ Defines field that depends on other table. If table has dependency to other tabl
 cause insertion (if needed and possible) to dependant table. Generator takes table object, to make dependency. You can
 look Table.addField example to see usage of dependency field.
 
-**(new in `0.1.8`)**
+**(new in 0.1.8)**
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.   
 #### email(options) -> fieldGenerator
@@ -277,7 +296,7 @@ Example:
 `person3` will insert one `person` and two `things` one of them will have `name="Picture"` and other will have
 `name="Paintings"` and both of them will have `owner=person3`.
 
-**(new in `0.1.8`)**
+**(new in 0.1.8)**
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.
 #### text(options) -> fieldGenerator (changed in `0.1.7`)
@@ -286,7 +305,8 @@ consists from symbols in `symbols`. Some predefined symbols strings may be found
 text of one word in latin symbols of length 2-8. Default delimiter is space.
 #### uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
-#### json() -> fieldGenerator (new in `0.1.6`)
+#### json() -> fieldGenerator
+**(new in 0.1.6)**
 Defines JSON field. Returns json string made using `template`. Template is an object, defining objects that may be in
 your JSON by default. Default `template` defines JSON of empty string.
 

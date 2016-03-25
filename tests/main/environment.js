@@ -1,4 +1,7 @@
+var uuid = require("uuid").v4;
+var Promise = require("bluebird");
 var assert = require("chai").assert;
+var sinon = require("sinon");
 
 var TableDao = require("./../testHelpers").tableDao;
 var Table = require("../../main/table");
@@ -180,9 +183,9 @@ describe("DBEnv object", function () {
             env.finalize();
             env.getTable("daughter").insert();
             env.cleanup();
-            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["mother"].delete), "Mother should not be deleted before daughter");
-            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["father"].delete), "Father should not be deleted before father");
-            assert.ok(env.dao["father"].delete.calledBefore(env.dao["grandFather"].delete), "GrandFather should not be deleted before father");
+            assert.ok(env.dao["daughter"].truncate.calledBefore(env.dao["mother"].truncate), "Mother should not be deleted before daughter");
+            assert.ok(env.dao["daughter"].truncate.calledBefore(env.dao["father"].truncate), "Father should not be deleted before father");
+            assert.ok(env.dao["father"].truncate.calledBefore(env.dao["grandFather"].truncate), "GrandFather should not be deleted before father");
         });
     });
 
@@ -195,5 +198,114 @@ describe("DBEnv object", function () {
             .addField("id", fields.uuid(), true)
             .addField("parent", fields.dependency(table, {dependsOnExistent: true}));
         env.finalize();
+    });
+
+    describe("saveFixture method", function () {
+
+        it("Should fail on not finalized", function (done) {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+
+            env.saveFixture().then(function () {
+                done("Hadn`t throw exception!");
+            }).catch(function (error) {
+                assert.instanceOf(error, DBEnvError);
+                done();
+            }).catch(done);
+        });
+
+        it("Should allow to save fixtures for all tables", function (done) {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var etalon1 = [{id: uuid()}, {id: uuid()}];
+            var etalon2 = [{id: uuid(), fk: etalon1[0].id}, {id:uuid(), fk: etalon1[1].id}];
+
+            dao1.select.returns(Promise.resolve(etalon1));
+            dao2.select.returns(Promise.resolve(etalon2));
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+
+            env.finalize();
+
+            env.saveFixture().then(function () {
+                assert.deepEqual(table1.fixture, etalon1);
+                assert.deepEqual(table2.fixture, etalon2);
+                done();
+            }).catch(done);
+        });
+
+    });
+
+    describe("setFixture method", function () {
+
+        it("Should throw exception if environment not finalized", function () {
+            var env = new DBEnv(new TableDao(), function (tableName, dao) {
+                return dao;
+            });
+            assert.throw(function () {
+                env.setFixture();
+            }, DBEnvError);
+        });
+
+        it("Should set fixtures in right order", function () {
+            var dao1 = new TableDao();
+            var dao2 = new TableDao();
+
+            var etalon1 = [{id: uuid()}, {id: uuid()}];
+            var etalon2 = [{id: uuid(), fk: etalon1[0].id}, {id:uuid(), fk: etalon1[1].id}];
+
+            var env = new DBEnv({
+                table1: dao1,
+                table2: dao2
+            });
+
+            var spyCleanup = sinon.spy(env, "cleanup");
+
+            var table1 = env.addTable("table1");
+            table1.addField("id", fields.uuid(), true);
+            table1.fixture = etalon1;
+            var spy1 = sinon.spy(table1, "setFixture");
+
+
+            var table2 = env.addTable("table2");
+            table2
+                .addField("id", fields.uuid(), true)
+                .addField("fk", fields.dependency(table1, {dependsOnExistent: true}));
+            table2.fixture = etalon2;
+            var spy2 = sinon.spy(table2, "setFixture");
+
+            env.finalize();
+
+            env.setFixture();
+
+            assert.isTrue(spyCleanup.calledBefore(spy1), "CleanUp must be made before first table fixtures!");
+            assert.isTrue(spyCleanup.calledBefore(spy2), "CleanUp must be made before second table fixtures!");
+            assert.isTrue(spy1.calledBefore(spy2), "first table fixtures must by set before second table");
+        });
     });
 });
