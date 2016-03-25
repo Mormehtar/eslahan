@@ -180,9 +180,9 @@ describe("DBEnv object", function () {
             env.finalize();
             env.getTable("daughter").insert();
             env.cleanup();
-            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["mother"].delete), "Mother should not be deleted before daughter");
-            assert.ok(env.dao["daughter"].delete.calledBefore(env.dao["father"].delete), "Father should not be deleted before father");
-            assert.ok(env.dao["father"].delete.calledBefore(env.dao["grandFather"].delete), "GrandFather should not be deleted before father");
+            assert.ok(env.dao["daughter"].truncate.calledBefore(env.dao["mother"].truncate), "Mother should not be deleted before daughter");
+            assert.ok(env.dao["daughter"].truncate.calledBefore(env.dao["father"].truncate), "Father should not be deleted before father");
+            assert.ok(env.dao["father"].truncate.calledBefore(env.dao["grandFather"].truncate), "GrandFather should not be deleted before father");
         });
     });
 

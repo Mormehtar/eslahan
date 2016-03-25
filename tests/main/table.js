@@ -171,7 +171,7 @@ describe("Table object", function () {
             table.insert();
             table.cleanup();
 
-            assert.ok(table.dao.delete.calledOnce);
+            assert.ok(table.dao.truncate.calledOnce);
         });
 
         it("Should cleanup cache", function () {

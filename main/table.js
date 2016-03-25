@@ -1,3 +1,4 @@
+var Promise = require("bluebird");
 var DBEnvError = require("./error");
 
 function Table (name, dao) {
@@ -16,6 +17,7 @@ function Table (name, dao) {
     this.indexes = {};
     this.pluginsNames = [];
     this.plugins = {};
+    this.fixture = [];
 }
 
 module.exports = Table;
@@ -67,7 +69,7 @@ Table.prototype.cleanup = function () {
     if (!this.finalized) {
         throw new DBEnvError("Can`t cleanup not finalized table");
     }
-    this.dao.delete();
+    this.dao.truncate();
     this.rows = {};
 };
 
@@ -189,4 +191,24 @@ Table.prototype.deletePlugin = function (name) {
         return this;
     }
     throw new DBEnvError("Plugin " + name + "is absent");
+};
+
+Table.prototype.saveFixture = function () {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t get fixture from not finalized table");
+    }
+
+    return this.dao.select().then(function (result) {
+        this.fixture = result || [];
+    }.bind(this));
+};
+
+Table.prototype.saveFixture = function () {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t get fixture from not finalized table");
+    }
+
+    return Promise.resolve(this.dao.select()).bind(this).then(function (result) {
+        this.fixture = result || [];
+    });
 };

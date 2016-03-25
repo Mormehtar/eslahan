@@ -1,27 +1,32 @@
 {
-    "name": "eslahan",
-    "version": "1.0.3",
-    "description": "Database environment constructor for tests",
-    "main": "index.js",
-    "scripts": {
-        "test": "mocha --recursive ./tests"
-    },
-    "keywords": ["test", "db", "zatanna"],
-    "author": "Dark Rider <mormehtar@gmail.com>",
-    "license": "OSL-3.0",
-    "homepage": "https://github.com/Mormehtar/eslahan",
-    "bugs": "https://github.com/Mormehtar/eslahan/issues",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Mormehtar/eslahan.git"
-    },
-    "devDependencies": {
-        "chai": "^3.2.0",
-        "mocha": "^2.2.5",
-        "sinon": "^1.15.4"
-    },
-    "dependencies": {
-        "moment": "^2.10.6",
-        "uuid": "^2.0.1"
-    }
+  "name": "eslahan",
+  "version": "2.0.0",
+  "description": "Database environment constructor for tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive ./tests"
+  },
+  "keywords": [
+    "test",
+    "db",
+    "zatanna"
+  ],
+  "author": "Dark Rider <mormehtar@gmail.com>",
+  "license": "OSL-3.0",
+  "homepage": "https://github.com/Mormehtar/eslahan",
+  "bugs": "https://github.com/Mormehtar/eslahan/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mormehtar/eslahan.git"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4"
+  },
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "moment": "^2.10.6",
+    "uuid": "^2.0.1"
+  }
 }

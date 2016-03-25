@@ -1,3 +1,4 @@
+var Promise = require("bluebird");
 var Table = require("./table");
 var DBEnvError = require("./error");
 
@@ -121,4 +122,13 @@ DBEnv.prototype.cleanup = function () {
     for (var i = this.tableOrder.length; i;) {
         this.tables[this.tableOrder[--i]].table.cleanup();
     }
+};
+
+DBEnv.prototype.saveFixture = function() {
+    if (!this.finalized) {
+        throw new DBEnvError("Can`t set fixture to not finalized environment");
+    }
+    return Promise.each(this.tableOrder, function (tableIndex){
+        this.tables[this.tableOrder[tableIndex]].table.saveFixture();
+    }.bind(this));
 };
