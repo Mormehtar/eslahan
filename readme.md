@@ -75,7 +75,7 @@ If we wish, we can generate their cousin who will share a grandfather with them,
 
 ## DAO and DB
 Eslahan was created on the assumption of using `Zatanna` or any other DAO offering `insert` and `delete` methods.
-From **version 2.0.0** Eslahan expects DAO to support `insert`, `delete`, `truncate` and `select` methods.
+From **version 2.0.1** Eslahan expects DAO to support `insert`, `delete` and `select` methods.
 Where `select` uses promises and returns whole table as array of objects if run without parameters.
 
 There are two key requirements one should mind when using Eslahan. First is, DAO methods should be synchronous and
@@ -117,9 +117,11 @@ tables makes possible to cleanUp tables.
 Method says to DAO (synchronously) that all tables can bee cleaned up and defines right order for table cleaning.
 #### DBEnv.saveFixture() -> Promise
 **(new in version 2.0.0)**
+
 Method says to Eslahan to save DB state in memory for later DB restoring. Method returns `Promise` and is **asynchronous**.
 #### DBEnv.setFixture()
 **(new in version 2.0.0)**
+
 Method says to Eslahan to restore DB state to that which was when `DBEnv.saveFixture()` has been called. Method is synchronous.
 It is strongly recommended to envelope execution plan with transaction. (`dao.execute(true)` in `Zatanna` for example).
 
@@ -214,13 +216,16 @@ keyValue of just inserted row and parameters passed to insert method in field eq
 Method deletes plugin with given `name`.
 #### Table.getAllRows(options) -> \[rowData...\]
 **(new in 0.1.7)**
+
 Returns array of all rows in table. If there are no rows, returns empty array. May accept options working identically
 to `Table.getRow`.
 #### Table.saveFixture() -> Promise
 **(new in version 2.0.0)**
+
 Method says to Eslahan to save Table state in memory for later DB restoring. Method returns `Promise` and is **asynchronous**.
 #### Table.setFixture()
 **(new in version 2.0.0)**
+
 Method says to Eslahan to restore Table state to that which was when `Table.saveFixture()` has been called. Method is synchronous.
 It is strongly recommended to envelope execution plan with transaction. (`dao.execute(true)` in `Zatanna` for example).
 
@@ -247,6 +252,7 @@ cause insertion (if needed and possible) to dependant table. Generator takes tab
 look Table.addField example to see usage of dependency field.
 
 **(new in 0.1.8)**
+
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.   
 #### email(options) -> fieldGenerator
@@ -297,6 +303,7 @@ Example:
 `name="Paintings"` and both of them will have `owner=person3`.
 
 **(new in 0.1.8)**
+
 Also `dependsOnExistent` parameter may be given. If it is `true` and no `value` passed to generator, it will return only
 existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` passed.
 #### text(options) -> fieldGenerator (changed in `0.1.7`)
@@ -307,6 +314,7 @@ text of one word in latin symbols of length 2-8. Default delimiter is space.
 Defines UUID field. Generating uuid.
 #### json() -> fieldGenerator
 **(new in 0.1.6)**
+
 Defines JSON field. Returns json string made using `template`. Template is an object, defining objects that may be in
 your JSON by default. Default `template` defines JSON of empty string.
 
