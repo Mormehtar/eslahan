@@ -27,7 +27,7 @@ describe("DateTime field", function() {
     });
 
     it("Should return NOW by default", function () {
-        var f = field();
+        var f = field({transformer: null});
         for (var i = REPEATS; i--;) {
             var begin = moment().subtract(1, 'ms');
             var result = moment(f());
@@ -37,7 +37,7 @@ describe("DateTime field", function() {
     });
 
     it("Should return result in range of nearest seven days", function () {
-        var f = field({to: moment().add(7, 'd')});
+        var f = field({to: moment().add(7, 'd'), transformer: null});
         var end = moment().add(7, 'd').add(1, 'ms');
         var begin = moment().subtract(1, 'ms');
         var result = moment(f());
@@ -45,7 +45,7 @@ describe("DateTime field", function() {
     });
 
     it("Should return result in range of previous seven days", function () {
-        var f = field({from: moment().subtract(7, 'd')});
+        var f = field({from: moment().subtract(7, 'd'), transformer: null});
         var begin = moment().subtract(7, 'd').subtract(1,'ms');
         for (var i = REPEATS; i--;) {
             var end = moment().add(1, 'ms');
@@ -56,12 +56,20 @@ describe("DateTime field", function() {
 
     it("Should return result in given range", function () {
         var point = moment();
-        var f = field({from: point.clone().subtract(7, 'd'), to: point.clone().add(7, 'd')});
+        var f = field({from: point.clone().subtract(7, 'd'), to: point.clone().add(7, 'd'), transformer: null});
         var begin = point.clone().subtract(7, 'd').subtract(1,'ms');
         var end = point.clone().add(7, 'd').add(1, 'ms');
         for (var i = REPEATS; i--;) {
             var result = moment(f());
             assert.ok(result.isBetween(begin, end));
         }
+    });
+
+    it("Should write data in iso format", function () {
+        var f = field();
+        var result = f();
+        assert.instanceOf(result.model, Date);
+        assert.typeOf(result.insert, "string");
+        assert.deepEqual(result.model, new Date(result.insert));
     });
 });

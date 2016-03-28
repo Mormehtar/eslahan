@@ -10,9 +10,25 @@ var defaults = {
     symbols: generateString.symbols.LATIN,
     wordsFrom: 1,
     wordsTo: 1,
-    delimiter: generateString.symbols.SPACE
+    delimiter: generateString.symbols.SPACE,
+    transformer: null
 };
+
+var converterGenerator = function (options) {
+    return function (value) {
+        if (options.transformer) {
+            return {
+                model: value,
+                insert: options.transformer(value)
+            };
+        } else {
+            return value;
+        }
+    }
+};
+
 var specificGenerator = function (options) {
+    var converter = converterGenerator(options);
     return  function () {
         var nWords = chooseFromRange(options.wordsFrom, options.wordsTo);
         var result = "";
@@ -22,11 +38,16 @@ var specificGenerator = function (options) {
                 result += generator(1, options.delimiter);
             }
         }
-        return result;
+        return converter(result);
     }
 };
 
 module.exports = function (options) {
-    return baseGenerator({options: options, defaults: defaults, specificGenerator: specificGenerator});
+    return baseGenerator({
+        options: options,
+        defaults: defaults,
+        specificGenerator: specificGenerator,
+        converterGenerator: converterGenerator
+    });
 };
 module.exports.symbols = generateString.symbols;

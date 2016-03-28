@@ -47,18 +47,25 @@ Table.prototype.insert = function (data) {
     data = data || {};
     var self = this;
     var fields = Object.keys(this.fields);
-    var insertObject = fields.reduce(function (obj, fieldName) {
-        obj[fieldName] = data.hasOwnProperty(fieldName) ? self.fields[fieldName](data[fieldName]) : self.fields[fieldName]();
-        return obj;
-    }, {});
-    self.dao.insert(insertObject);
-    var key = insertObject[self.key];
+    var insertObject = {};
+    var modelObject = {};
     fields.forEach(function (fieldName) {
-        if (self.indexes[fieldName]) {
-            addIndexElement(self.indexes[fieldName], key, insertObject[fieldName]);
+        var field = data.hasOwnProperty(fieldName) ? self.fields[fieldName](data[fieldName]) : self.fields[fieldName]();
+        if (field && typeof field === "object" && "insert" in field && "model" in field) {
+            insertObject[fieldName] = field.insert;
+            modelObject[fieldName] = field.model;
+        } else {
+            insertObject[fieldName] = modelObject[fieldName] = field;
         }
     });
-    self.rows[key] = insertObject;
+    self.dao.insert(insertObject);
+    var key = modelObject[self.key];
+    fields.forEach(function (fieldName) {
+        if (self.indexes[fieldName]) {
+            addIndexElement(self.indexes[fieldName], key, modelObject[fieldName]);
+        }
+    });
+    self.rows[key] = modelObject;
     self.pluginsNames.forEach(function (pluginName) {
         self.plugins[pluginName].call(self, key, data[pluginName]);
     });
