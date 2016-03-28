@@ -44,4 +44,19 @@ describe("Text field", function() {
     it("Should allow to generate text with given symbols", function () {
         check(field({symbols:field.symbols.DIGITS}), /^\d{2,8}$/);
     });
+
+    it("Should convert input data if converter given", function () {
+        var fieldGenerator = field({transformer: function (value) {
+            return "TRANSFORMED" + value;
+        }});
+        assert.deepEqual(fieldGenerator("!SomeData!"), {insert: "TRANSFORMED!SomeData!", model:"!SomeData!"});
+    });
+
+    it("Should convert generated data if converter given", function () {
+        var fieldGenerator = field({transformer: function (value) {
+            return "TRANSFORMED" + value;
+        }});
+        var result = fieldGenerator("!SomeData!");
+        assert.equal(result.insert, "TRANSFORMED" + result.model);
+    });
 });

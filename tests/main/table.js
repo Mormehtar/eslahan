@@ -12,7 +12,7 @@ var uuidField = fields.uuid;
 var DBEnvError = eslahan.DBEnvError;
 
 function createTestTable () {
-    var table = new Table("TestTeable", new EtalonDao());
+    var table = new Table("TestTable", new EtalonDao());
     table
         .addField("id", uuidField(), true)
         .addField("data", uuidField());
@@ -114,6 +114,34 @@ describe("Table object", function () {
             assert.isDefined(insertedObj.data);
         });
 
+        it("Should create and insert row using DAO, passing given parameters", function () {
+            var dataToInsert = {id: uuid(), data: uuid()};
+            var table = createTestTable();
+            table.insert(dataToInsert);
+
+            assert.ok(table.dao.insert.calledOnce);
+            var insertedObj = table.dao.insert.firstCall.args[0];
+            assert.deepEqual(insertedObj, dataToInsert);
+        });
+
+        it("Should create and insert row using DAO, passing given transformed parameters", function () {
+            var dataToInsert = {id: uuid(), data: uuid()};
+
+            var table = new Table("TestTable", new EtalonDao());
+            table
+                .addField("id", uuidField(), true)
+                .addField("data", fields.text({transformer: function (value) {
+                    return "TRANSFORMED" + value;
+                }}));
+            table.finalize();
+            table.insert(dataToInsert);
+
+            assert.ok(table.dao.insert.calledOnce);
+            var insertObject = table.dao.insert.firstCall.args[0];
+            assert.equal(insertObject.id, dataToInsert.id);
+            assert.equal(insertObject.data, "TRANSFORMED" + dataToInsert.data);
+        });
+
         it("Should cache inserted row", function () {
             var table = createTestTable();
             var key = table.insert();
@@ -173,7 +201,7 @@ describe("Table object", function () {
             table.insert();
             table.cleanup();
 
-            assert.ok(table.dao.truncate.calledOnce);
+            assert.ok(table.dao.delete.calledOnce);
         });
 
         it("Should cleanup cache", function () {

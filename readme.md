@@ -168,6 +168,8 @@ demands to inserted row or any daughter rows. For example:
 
 First insert method create `daughter` with random fields and dependant `mother` with random fields. Second creates
 `daughter` with random key and name "Ekaterina" and dependant mother with name "Anastasia".
+From **version 2.1.0** some fields may write down to DB one variant of input and return another.
+For example `datetime` field returns `Date` object, but write down to DB `string` in ISO format.
 #### Table.cleanUp()
 Commands DAO to clean up table and cleans up cache. Normally should be called by Environment.
 #### Table.setKey(name)
@@ -243,6 +245,8 @@ method it can get options like:
 Defines datetime field. It returns now by default. If only `from` passed, field will be a random datetime from `from` to
 now. If only `to` passed, field will be random datetime from now to `to`. If `from` and `to` passed, field will be
 random datetime from `from` to `to`.
+From **version 2.1.0** writes down to DB string in ISO format. And allows `transformer` parameter.
+Transformer may be a function to transform value before DB writing, or `null` to suppress default transformation.
 #### decimal(options) -> fieldGenerator
 Defines decimal field. It returns string with number from `from` to `to` with `fractionalDigits` digits after dot. By
 default it returns number in trange 0-100 with two digits after dot.
@@ -310,6 +314,8 @@ existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` p
 Defines text field. Returns text of `wordsFrom`-`wordsTo` words divided by `delimiter` of length `wordFrom`-`wordTo` and
 consists from symbols in `symbols`. Some predefined symbols strings may be found in `text.symbols`. By default generates
 text of one word in latin symbols of length 2-8. Default delimiter is space.
+From **version 2.2.0** accepts `transformer` parameter. It must be a function that transforms string before writing down to DB.
+It may be used to calculate hash for password for example.
 #### uuid() -> fieldGenerator
 Defines UUID field. Generating uuid.
 #### json() -> fieldGenerator
