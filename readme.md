@@ -75,7 +75,7 @@ If we wish, we can generate their cousin who will share a grandfather with them,
 
 ## DAO and DB
 Eslahan was created on the assumption of using `Zatanna` or any other DAO offering `insert` and `delete` methods.
-From **version 2.0.0** Eslahan expects DAO to support `insert`, `delete`, `truncate` and `select` methods.
+From **version 2.0.1** Eslahan expects DAO to support `insert`, `delete` and `select` methods.
 Where `select` uses promises and returns whole table as array of objects if run without parameters.
 
 There are two key requirements one should mind when using Eslahan. First is, DAO methods should be synchronous and
