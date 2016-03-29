@@ -241,6 +241,8 @@ method it can get options like:
 
     table.addField("SomeInt", eslahan.fields.int({from: 5, to: 10}));
 
+#### boolean(options) -> fieldGenerator **new in version 2.1.1**
+Defines boolean field. It returns `true` or `false` with probability of option `probability` (0.5 by default).
 #### datetime(options) -> fieldGenerator
 Defines datetime field. It returns now by default. If only `from` passed, field will be a random datetime from `from` to
 now. If only `to` passed, field will be random datetime from now to `to`. If `from` and `to` passed, field will be
