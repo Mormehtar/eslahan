@@ -127,6 +127,30 @@ describe("DBEnv object", function () {
             assert.equal(env.tables["daughter"].priority, 2);
         });
 
+        it("Should set priorities for tables even if there are double dependencies", function () {
+            var dao = new TableDao();
+            var env = new DBEnv({
+                parent: dao, daughter: dao, grandParent: dao, someOther: dao
+            });
+            env.addTable("grandParent", fields.uuid(), true)
+                .addField("id", fields.uuid(), true);
+            env.addTable("someOther")
+                .addField("id", fields.uuid(), true);
+            env.addTable("parent")
+                .addField("id", fields.uuid(), true)
+                .addField("grandParent", fields.dependency(env.getTable("grandParent")));
+            env.addTable("daughter")
+                .addField("id", fields.uuid(), true)
+                .addField("mother", fields.dependency(env.getTable("parent")))
+                .addField("father", fields.dependency(env.getTable("parent")));
+            env.finalize();
+
+            assert.equal(env.tables["grandParent"].priority, 0);
+            assert.equal(env.tables["someOther"].priority, 0);
+            assert.equal(env.tables["parent"].priority, 1);
+            assert.equal(env.tables["daughter"].priority, 2);
+        });
+
         it("should create tableOrder property", function () {
             var env = new DBEnv(new TableDao(), function (tableName, dao) {
                 return dao;
