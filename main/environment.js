@@ -72,19 +72,14 @@ DBEnv.prototype.finalize = function () {
             table.table.finalize();
         }
         var fields = table.table.fields;
-        table.dependencies = 0;
-        table.depends = Object.keys(fields).map(function (fieldName) {
+
+        table.depends = Object.keys(fields).reduce(function (obj, fieldName) {
             var dependency = fields[fieldName].dependency;
-            return dependency != table.table ? dependency && dependency.name : false;
-        }).filter(function (tableName) {
-            if (tableName) {
-                ++table.dependencies;
-                return true;
-            }
-        }).reduce(function (obj, table) {
-            obj[table] = true;
+            if ( dependency && dependency != table.table && dependency.name) { obj[dependency.name] = true }
             return obj;
         }, {});
+        table.dependencies = Object.keys(table.depends).length;
+
         if (table.dependencies === 0) {
             table.priority = 0;
             finished.push(table);

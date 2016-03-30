@@ -1,3 +1,8 @@
+# version 2.1.2
+
+## Bug fixes
+* Repaired issue with tables that depend from other table in more than one field.
+
 # version 2.1.1
 
 ## features
@@ -9,7 +14,6 @@
 * Model view (in memory) can be not equal to Insert view (data to insert in DB). For passwords and Date issues.
 * Text field now accepts transformer.
 * Datetime field now writes down Datetime in ISO format as string by default.
-
 
 ## Bug fixes
 * All tests repaired.
