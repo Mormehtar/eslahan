@@ -1,6 +1,6 @@
 {
   "name": "eslahan",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Database environment constructor for tests",
   "main": "index.js",
   "scripts": {
