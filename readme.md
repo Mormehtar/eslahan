@@ -241,6 +241,8 @@ method it can get options like:
 
     table.addField("SomeInt", eslahan.fields.int({from: 5, to: 10}));
 
+All fields support `nullable` option, which allows to define probability that value will be equal to null.
+
 #### boolean(options) -> fieldGenerator **new in version 2.1.1**
 Defines boolean field. It returns `true` or `false` with probability of option `probability` (0.5 by default).
 #### datetime(options) -> fieldGenerator
@@ -265,6 +267,44 @@ existent `id`s or `null`. Generator will ignore `dependsOnExistent` if `value` p
 Defines field with random email. Gets `addressFrom` (default 3), `addressTo` (default 8), `serverFrom` (default 3),
 `serverTo` (default 8), `domainFrom` (default 1), `domainTo` (default 3). Field generates email with lengths in ranges
 (`addressFrom` - `addressTo`)@(`serverFrom` - `serverTo`).(`domainFrom` - `domainTo`).
+#### url(options) -> fieldGenerator **new in version 2.1.3**
+Defines random url field.
+Supports following options:
+
+`domainsOptions` - is array of objects like `{from: 3, to: 5}` or `{value:"com"}`, describing rules of domain generating.
+Elements in array describe according domain level.
+
+For example:
+
+    {
+        domainsOptions: [
+            {
+                value: "com"
+            },
+            {
+                from: 3,
+                to: 8
+            }
+        ]
+    }
+
+Will generate random domain in "com" zone.
+`path` - option allows to declare path. For example:
+
+    {
+        domainsOptions: [
+            {
+                value: "com"
+            },
+            {
+                value: "example"
+            }
+        ],
+        path: "random"
+    }
+
+Will always generate url: `example.com/random`
+`pathFrom` and `pathTo` - parameters defining length range for path after domain name.
 #### float(options) -> fieldGenerator
 Defines random float point field in range from `from` to `to`. By default 0-100.
 #### increment(options) -> fieldGenerator
