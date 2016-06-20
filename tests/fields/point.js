@@ -30,10 +30,10 @@ describe("Point field", function() {
         var f = field();
         for(var i = REPEATS; i--;) {
             var result = f();
-            assert.ok(result.model.x >= -1, 'x');
-            assert.ok(result.model.x <= 1, 'x');
-            assert.ok(result.model.y >= -1, 'y');
-            assert.ok(result.model.y <= 1, 'y');
+            assert.isAtLeast(result.model.x, -1, 'x');
+            assert.isAtMost(result.model.x, 1, 'x');
+            assert.isAtLeast(result.model.y, -1, 'y');
+            assert.isAtMost(result.model.y, 1, 'y');
             assert.equal(result.insert, '(' + result.model.x + ',' + result.model.y + ')');
         }
     });
@@ -42,10 +42,10 @@ describe("Point field", function() {
         var f = field({x: {from: 2, to: 3}, y: {from: -3, to: -2}});
         for(var i = REPEATS; i--;) {
             var result = f();
-            assert.ok(result.model.x >= 2, 'x');
-            assert.ok(result.model.x <= 3, 'x');
-            assert.ok(result.model.y >= -2, 'y');
-            assert.ok(result.model.y <= -3, 'y');
+            assert.isAtLeast(result.model.x, 2, 'x');
+            assert.isAtMost(result.model.x, 3, 'x');
+            assert.isAtLeast(result.model.y, -3, 'y');
+            assert.isAtMost(result.model.y, -2, 'y');
             assert.equal(result.insert, '(' + result.model.x + ',' + result.model.y + ')');
         }
     });

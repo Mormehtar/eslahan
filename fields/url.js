@@ -24,7 +24,7 @@ var specificGenerator = function (options) {
     return function () {
         var result = options.domainsOptions.map(function (domainOptions) {
             return "value" in domainOptions ? domainOptions.value : generator(chooseFromRange(domainOptions.from, domainOptions.to), SYMBOLS);
-        }).join(".");
+        }).reverse().join(".");
         var path = "path" in options ? options.path : generator(chooseFromRange(options.pathFrom, options.pathTo), SYMBOLS);
         return path ? [ result, path ].join("/") : result;
     };
