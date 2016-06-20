@@ -289,6 +289,7 @@ For example:
     }
 
 Will generate random domain in "com" zone.
+
 `path` - option allows to declare path. For example:
 
     {
@@ -304,7 +305,19 @@ Will generate random domain in "com" zone.
     }
 
 Will always generate url: `example.com/random`
+
 `pathFrom` and `pathTo` - parameters defining length range for path after domain name.
+#### point(options) -> fieldGenerator **new in version 2.1.4**
+Defines random point field. It generates points in format of `(x,y)` and returns objects like `{x:1,y:1}`.
+Also gets input parameters and transform them in the same way.
+Also may accept options object with parameters `x` and `y`, working in the same way as `float` field.
+Defaults are:
+
+    {
+        x: {from: -1, to: 1},
+        y: {from: -1, to: 1}
+    }
+
 #### float(options) -> fieldGenerator
 Defines random float point field in range from `from` to `to`. By default 0-100.
 #### increment(options) -> fieldGenerator
