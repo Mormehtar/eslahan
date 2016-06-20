@@ -289,6 +289,7 @@ For example:
     }
 
 Will generate random domain in "com" zone.
+
 `path` - option allows to declare path. For example:
 
     {
@@ -304,6 +305,7 @@ Will generate random domain in "com" zone.
     }
 
 Will always generate url: `example.com/random`
+
 `pathFrom` and `pathTo` - parameters defining length range for path after domain name.
 #### float(options) -> fieldGenerator
 Defines random float point field in range from `from` to `to`. By default 0-100.
