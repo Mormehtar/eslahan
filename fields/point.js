@@ -16,6 +16,7 @@ function converter (value) {
         return value;
     }
 }
+function converterGenerator () { return converter; }
 
 function specificGenerator (options) {
 
@@ -34,7 +35,7 @@ module.exports = function (options) {
     return baseGenerator({
         options: options,
         defaults: defaults,
-        converterGenerator: converter,
+        converterGenerator: converterGenerator,
         specificGenerator: specificGenerator
     });
 };
