@@ -26,7 +26,7 @@ describe("Url field", function() {
     });
 
     it("Should return url with defaults", function () {
-        check(field(), /^\w{3,8}.\w{2,3}(\\\w{3,8})?$/);
+        check(field(), /^\w{3,8}.\w{2,3}(\/\w{3,8})?$/);
     });
 
     it("Should return url with given parameters", function () {
@@ -43,7 +43,7 @@ describe("Url field", function() {
             ],
             pathFrom: 0,
             pathTo: 3
-        }), /^\w{2,3}.\w{4,5}(\\\w{0,3})?$/);
+        }), /^\w{2,3}.\w{4,5}(\/\w{0,3})?$/);
     });
 
     it("Should return url with predefined domain if passed", function () {
@@ -57,13 +57,13 @@ describe("Url field", function() {
                     to: 8
                 }
             ]
-        }), /^\w{2,3}.com(\\\w{3,8})?$/);
+        }), /^\w{3,8}.com(\/\w{3,8})?$/);
     });
 
     it("Should return url with predefined predefined path if passed", function () {
         check(field({
             path: "random"
-        }), /^\w{3,8}.\w{2,3}\\random$/);
+        }), /^\w{3,8}.\w{2,3}\/random$/);
     });
 
     it("Should not return url with ending slash if no path", function () {

@@ -72,7 +72,7 @@ describe("DBEnv object", function () {
         });
     });
 
-    describe.only("finalize method", function () {
+    describe("finalize method", function () {
         it("Should throw error if finalized already", function () {
             var env = new DBEnv();
             env.finalize();
