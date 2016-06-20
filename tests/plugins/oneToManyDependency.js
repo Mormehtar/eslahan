@@ -227,4 +227,27 @@ describe("One to many dependency plugin", function () {
             user.insert({rights: [{id:"SomeUser"}], id: "someData"});
         }, DBEnvError);
     });
+
+    it.only("Should not create dependent fields recursively if not the first in chain", function () {
+        var user = new Table("user", new EtalonDao());
+        user
+            .addField("id", fields.uuid(), true)
+            .addField("data", fields.uuid())
+            .finalize();
+        var right = new Table("right", new EtalonDao());
+        right
+            .addField("id", fields.uuid(), true)
+            .addField("user", fields.dependency(user))
+            .finalize();
+        user.addPlugin("rights", pluginGenerator(user, right, "user"));
+        var left = new Table("left", new EtalonDao());
+        left
+            .addField("id", fields.uuid(), true)
+            .addField("right", fields.dependency(right))
+            .finalize();
+        right.addPlugin("lefts", pluginGenerator(right, left, "right"));
+
+        right.insert();
+        assert.lengthOf(Object.keys(right.rows), 1);
+    });
 });
