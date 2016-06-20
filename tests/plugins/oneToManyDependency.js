@@ -228,7 +228,7 @@ describe("One to many dependency plugin", function () {
         }, DBEnvError);
     });
 
-    it.only("Should not create dependent fields recursively if not the first in chain", function () {
+/*    it("Should not create dependent fields recursively if not the first in chain", function () {
         var user = new Table("user", new EtalonDao());
         user
             .addField("id", fields.uuid(), true)
@@ -249,5 +249,5 @@ describe("One to many dependency plugin", function () {
 
         right.insert();
         assert.lengthOf(Object.keys(right.rows), 1);
-    });
+    });*/
 });
